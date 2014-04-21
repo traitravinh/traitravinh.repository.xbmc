@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="plugin.video.nhaccuatui"
+  version="1.0.0"
+  name="NhacCuaTui"
+  provider-name="Wonnykc">
+  <requires>        
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="nhaccuatui.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>NhacCuaTui</summary>
+    <description>Search and play music on nhaccuatui.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>
