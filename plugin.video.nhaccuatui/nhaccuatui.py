@@ -151,9 +151,6 @@ def home():
             title = BeautifulSoup(str(tsoup('h2')[0]))('a')[0].contents[0]
             link = BeautifulSoup(str(tsoup('h2')[0]))('a')[0]['href']
 
-            print title
-            print link
-
     except:pass
 
 def index(url):
@@ -167,26 +164,10 @@ def index(url):
             ilink = isoup('a')[0]['href']
             ititle = isoup('a')[0]['title']
 
-            print ilink
-            print ititle.encode('utf-8')
-
-        # box_pageview = soup('div',{'class':'box_pageview'})
-        # pages = BeautifulSoup(str(box_pageview[0])).findAll('a')
-        # for p in pages:
-        #     psoup = BeautifulSoup(str(p))
-        #     plink = psoup('a')[0]['href']
-        #     ptitle = psoup('a')[0].contents[0]
-        #
-        #     print plink
-        #     print ptitle
-
-
     except:pass
 
 def Play(url):
     try:
-        print 'CAME HERE====================>'
-        print url
         xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER)
         xbmcPlayer.play(url)
     except:pass
