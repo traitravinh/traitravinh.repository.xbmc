@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="plugin.video.bongdatructuyen"
+  version="1.0.0"
+  name="bongdatructuyen.vn"
+  provider-name="traitravinh">
+  <requires>       		
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="bongdatructuyen.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Watch Soccer Live/Highlights using SopCast, AceStream</summary>
+    <description>Watch Soccer Live/Highlights Videos</description>
+    <platform>all</platform>
+  </extension>
+</addon>
