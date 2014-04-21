@@ -172,7 +172,7 @@ except:
         pass
 try:
         mode=int(params["mode"])
-except:
+except
         pass
 try:
         mirrorname=urllib.unquote_plus(params["mirrorname"])
@@ -186,7 +186,6 @@ if mode==None or url==None or len(url)<1:
 elif mode==1:
         index2(url)
 elif mode==2:
-        print url
         getVideos(name,url)
 elif mode==3:
         Category(url)
