@@ -146,8 +146,8 @@
 
 <addon id="repository.traitravinh" name="TraiTraVinh's Testing Repo" version="1.0" provider-name="traitravinh">
 	<extension point="xbmc.addon.repository" name="TraiTraVinh's Testing Repo">
-		<info compressed="false">https://github.com/traitravinh/traitravinh.repository.xbmc/addons.xml</info>
-		<checksum>https://github.com/traitravinh/traitravinh.repository.xbmc/addons.xml.md5</checksum>
+		<info compressed="false">https://github.com/traitravinh/traitravinh.repository.xbmc/blob/master/addons.xml</info>
+		<checksum>https://github.com/traitravinh/traitravinh.repository.xbmc/blob/master/addons.xml.md5</checksum>
 		<datadir zip="true">https://github.com/traitravinh/traitravinh.repository.xbmc/tree/master/zips</datadir>
 	</extension>
 	<extension point="xbmc.addon.metadata">
