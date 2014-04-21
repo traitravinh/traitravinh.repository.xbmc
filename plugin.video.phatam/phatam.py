@@ -172,7 +172,7 @@ except:
         pass
 try:
         mode=int(params["mode"])
-except
+except:
         pass
 try:
         mirrorname=urllib.unquote_plus(params["mirrorname"])
