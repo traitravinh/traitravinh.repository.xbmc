@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="repository.traitravinh" name="TraiTraVinh's Testing Repo" version="1.0" provider-name="traitravinh">
 	<extension point="xbmc.addon.repository" name="TraiTraVinh's Testing Repo">
-		<info compressed="false">http://dl.dropboxusercontent.com/u/25817973/My-Repo/addons.xml</info>
-		<checksum>http://dl.dropboxusercontent.com/u/25817973/My-Repo/addons.xml.md5</checksum>
-		<datadir zip="true">https://www.dropbox.com/sh/e80048lfh0s2ynl/h5GPmjDYAs</datadir>
+		<info compressed="false">https://github.com/traitravinh/traitravinh.repository.xbmc/addons.xml</info>
+		<checksum>https://github.com/traitravinh/traitravinh.repository.xbmc/addons.xml.md5</checksum>
+		<datadir zip="true">https://github.com/traitravinh/traitravinh.repository.xbmc/tree/master/zips</datadir>
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary>Testing repo</summary>
