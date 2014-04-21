@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="plugin.video.baobongda"
+  version="1.0.0"
+  name="BaoBongDa"
+  provider-name="traitravinh">
+  <requires>        
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="default.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Watch Soccer highlight from baobondaplus.vn</summary>
+    <description>Watch soccer highlight (Vietnamese)Videos</description>
+    <platform>all</platform>
+  </extension>
+</addon>
