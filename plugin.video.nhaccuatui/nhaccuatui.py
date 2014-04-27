@@ -1,12 +1,19 @@
 __author__ = 'traitravinh'
-import urllib, urllib2, re, os, sys
+import urllib, urllib2, re, os, sys, StringIO
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 from bs4 import BeautifulSoup
+import SimpleDownloader as downloader
+
+
+downloader = downloader.SimpleDownloader()
+addonId             = xbmcaddon.Addon().getAddonInfo("id")
 
 mysettings = xbmcaddon.Addon(id='plugin.video.nhaccuatui')
 home = mysettings.getAddonInfo('path')
 searchHistory = xbmc.translatePath(os.path.join(home,'history.txt'))
+downloadpath = xbmc.translatePath(os.path.join(home,'/download'))
+dataPath = xbmc.translatePath('special://profile/addon_data/%s' % (addonId))
 searchlink ='http://www.nhaccuatui.com/tim-kiem?q='
 home_link = 'http://www.nhaccuatui.com/'
 logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
@@ -151,6 +158,9 @@ def home():
             title = BeautifulSoup(str(tsoup('h2')[0]))('a')[0].contents[0]
             link = BeautifulSoup(str(tsoup('h2')[0]))('a')[0]['href']
 
+            print title
+            print link
+
     except:pass
 
 def index(url):
@@ -164,12 +174,38 @@ def index(url):
             ilink = isoup('a')[0]['href']
             ititle = isoup('a')[0]['title']
 
+            print ilink
+            print ititle.encode('utf-8')
+
+        # box_pageview = soup('div',{'class':'box_pageview'})
+        # pages = BeautifulSoup(str(box_pageview[0])).findAll('a')
+        # for p in pages:
+        #     psoup = BeautifulSoup(str(p))
+        #     plink = psoup('a')[0]['href']
+        #     ptitle = psoup('a')[0].contents[0]
+        #
+        #     print plink
+        #     print ptitle
+
+
     except:pass
 
 def Play(url):
     try:
-        xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER)
-        xbmcPlayer.play(url)
+        listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
+        listitem.setPath(url)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(url,listitem)
+    except:pass
+
+def download(url):
+    try:
+        filename = re.compile('[a-zA-Z0-9-_]+\.\w+$').findall(url)[0]
+        file_extension = re.compile('\.\w+$').findall(url)[0]
+        title = str(filename).replace(file_extension,'')
+        params = {"url": url, "download_path": dataPath, "Title": title}
+        downloader.download(filename, params)
+
     except:pass
 
 def addDir(name,url,mode,iconimage,cname):
@@ -181,12 +217,14 @@ def addDir(name,url,mode,iconimage,cname):
     return ok
 
 def addLink(name,url,mode,iconimage,cname):
-        # u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
-        u = urllib.unquote_plus(url)
+        u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
+        # u = urllib.unquote_plus(url)
+        contextmenuitems = []
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
         liz.setInfo( type="Video", infoLabels={ "Title": name})
         liz.setProperty('mimetype', 'video/x-msvideo')
-        pl.add(url, liz)
+        contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
         return ok
 
@@ -251,5 +289,7 @@ elif mode==5:
     explore(url)
 elif mode==6:
     Play(url)
+elif mode==7:
+    download(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))

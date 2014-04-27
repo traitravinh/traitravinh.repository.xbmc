@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon
   id="plugin.video.nhaccuatui"
-  version="1.0.0"
+  version="1.0.1"
   name="NhacCuaTui"
   provider-name="Wonnykc">
-  <requires>        
+  <requires>
+	<import addon="script.module.simple.downloader.beta" version="0.9.1"/>
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="nhaccuatui.py">
