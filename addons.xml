@@ -38,11 +38,10 @@
 
 <addon
   id="plugin.video.nhaccuatui"
-  version="1.0.1"
+  version="1.0.0"
   name="NhacCuaTui"
   provider-name="Wonnykc">
   <requires>
-	<import addon="script.module.simple.downloader.beta" version="0.9.1"/>
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="nhaccuatui.py">
