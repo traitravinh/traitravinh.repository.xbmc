@@ -153,7 +153,6 @@ def Play(url):
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(url)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        #xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(url,listitem)
     except:pass
 
 def download(url):
@@ -171,6 +170,13 @@ def download(url):
                 downloader.download(filename, params)
         else:
             downloader.download(filename, params)
+    except:pass
+
+def delete(url):
+    try:
+        dialog = xbmcgui.Dialog()
+        if dialog.yesno('Delete','Delete File?'):
+            os.remove(url)
     except:pass
 
 def list_downloaded(url):
@@ -197,9 +203,12 @@ def addLink(name,url,mode,iconimage,cname):
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
         liz.setInfo( type="Video", infoLabels={ "Title": name})
         liz.setProperty('mimetype', 'video/x-msvideo')
+        contextmenuitems = []
         if url.find('http://')!=-1:
-            contextmenuitems = []
             contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+            liz.addContextMenuItems(contextmenuitems,replaceItems=False)
+        else:
+            contextmenuitems.append(('Delete','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
             liz.addContextMenuItems(contextmenuitems,replaceItems=False)
         pl.add(u,liz)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
@@ -270,4 +279,6 @@ elif mode==7:
     download(url)
 elif mode==8:
     list_downloaded(url)
+elif mode==9:
+    delete(url)
 xbmcplugin.endOfDirectory(int(sysarg))
