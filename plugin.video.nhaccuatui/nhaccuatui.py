@@ -148,48 +148,6 @@ def getMediaTitle(url):
         return finaltitle
     except:pass
 
-def home():
-    try:
-        link = urllib2.urlopen(home_link).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        title_box_key = soup('div',{'class':'tile_box_key'})
-        for t in title_box_key:
-            tsoup = BeautifulSoup(str(t))
-            title = BeautifulSoup(str(tsoup('h2')[0]))('a')[0].contents[0]
-            link = BeautifulSoup(str(tsoup('h2')[0]))('a')[0]['href']
-
-            print title
-            print link
-
-    except:pass
-
-def index(url):
-    try:
-        link = urllib2.urlopen(home_link).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        fram_select = soup('div',{'class':'fram_select'})
-        info_album = BeautifulSoup(str(fram_select[3]))('div',{'class':'info_song'})
-        for i in info_album:
-            isoup = BeautifulSoup(str(i))
-            ilink = isoup('a')[0]['href']
-            ititle = isoup('a')[0]['title']
-
-            print ilink
-            print ititle.encode('utf-8')
-
-        # box_pageview = soup('div',{'class':'box_pageview'})
-        # pages = BeautifulSoup(str(box_pageview[0])).findAll('a')
-        # for p in pages:
-        #     psoup = BeautifulSoup(str(p))
-        #     plink = psoup('a')[0]['href']
-        #     ptitle = psoup('a')[0].contents[0]
-        #
-        #     print plink
-        #     print ptitle
-
-
-    except:pass
-
 def Play(url):
     try:
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
@@ -201,10 +159,18 @@ def Play(url):
 def download(url):
     try:
         filename = re.compile('[a-zA-Z0-9-_]+\.\w+$').findall(url)[0]
-        file_extension = re.compile('\.\w+$').findall(url)[0]
-        title = str(filename).replace(file_extension,'')
+        type = re.compile('\.\w+$').findall(url)[0]
+        title_num = re.compile('(?:-|_|\+)\w*\.\w+$').findall(filename)[0]
+        title = str(filename).replace(title_num,'')
+        filename = title+type
         params = {"url": url, "download_path": downloadpath, "Title": title}
-        downloader.download(filename, params)
+
+        if os.path.isfile(downloadpath+filename):
+            dialog = xbmcgui.Dialog()
+            if dialog.yesno('Download message','File exists! re-download?'):
+                downloader.download(filename, params)
+        else:
+            downloader.download(filename, params)
     except:pass
 
 def list_downloaded(url):
@@ -213,7 +179,6 @@ def list_downloaded(url):
             filetype = '.mp3'
         elif str(name).find('Video')!=-1:
             filetype = '.mp4'
-
         loadfiles = [a for a in os.listdir(url) if a.endswith(filetype)]
         for a in loadfiles:
             addLink(a,url+a,6,logo,'')
@@ -229,12 +194,13 @@ def addDir(name,url,mode,iconimage,cname):
 
 def addLink(name,url,mode,iconimage,cname):
         u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
-        contextmenuitems = []
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
         liz.setInfo( type="Video", infoLabels={ "Title": name})
         liz.setProperty('mimetype', 'video/x-msvideo')
-        contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
-        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
+        if url.find('http://')!=-1:
+            contextmenuitems = []
+            contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+            liz.addContextMenuItems(contextmenuitems,replaceItems=False)
         pl.add(u,liz)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
         return ok
