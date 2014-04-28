@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="General Settings">		
+		<setting id="download_path" type="folder" label="Download Path" default="" />                
+	</category>	
+</settings>

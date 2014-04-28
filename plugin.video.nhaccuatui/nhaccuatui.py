@@ -7,13 +7,10 @@ import SimpleDownloader as downloader
 
 
 downloader = downloader.SimpleDownloader()
-addonId             = xbmcaddon.Addon().getAddonInfo("id")
-
 mysettings = xbmcaddon.Addon(id='plugin.video.nhaccuatui')
 home = mysettings.getAddonInfo('path')
 searchHistory = xbmc.translatePath(os.path.join(home,'history.txt'))
-downloadpath = xbmc.translatePath(os.path.join(home,'/download'))
-dataPath = xbmc.translatePath('special://profile/addon_data/%s' % (addonId))
+downloadpath = mysettings.getSetting('download_path')
 searchlink ='http://www.nhaccuatui.com/tim-kiem?q='
 home_link = 'http://www.nhaccuatui.com/'
 logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
@@ -21,6 +18,8 @@ pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
 def Home():
     addDir('Search',searchlink,1,logo,'')
+    addDir('Downloaded Audio',downloadpath,8,logo,'')
+    addDir('Downloaded Video',downloadpath,8,logo,'')
 
 def SearchFirst(url):
     try:
@@ -46,6 +45,7 @@ def Search(url):
 
         index_search(url)
     except: pass
+
 
 
 def index_search(url):
@@ -195,7 +195,7 @@ def Play(url):
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(url)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(url,listitem)
+        #xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(url,listitem)
     except:pass
 
 def download(url):
@@ -203,9 +203,20 @@ def download(url):
         filename = re.compile('[a-zA-Z0-9-_]+\.\w+$').findall(url)[0]
         file_extension = re.compile('\.\w+$').findall(url)[0]
         title = str(filename).replace(file_extension,'')
-        params = {"url": url, "download_path": dataPath, "Title": title}
+        params = {"url": url, "download_path": downloadpath, "Title": title}
         downloader.download(filename, params)
+    except:pass
 
+def list_downloaded(url):
+    try:
+        if str(name).find('Audio')!=-1:
+            filetype = '.mp3'
+        elif str(name).find('Video')!=-1:
+            filetype = '.mp4'
+
+        loadfiles = [a for a in os.listdir(url) if a.endswith(filetype)]
+        for a in loadfiles:
+            addLink(a,url+a,6,logo,'')
     except:pass
 
 def addDir(name,url,mode,iconimage,cname):
@@ -218,13 +229,13 @@ def addDir(name,url,mode,iconimage,cname):
 
 def addLink(name,url,mode,iconimage,cname):
         u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
-        # u = urllib.unquote_plus(url)
         contextmenuitems = []
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
         liz.setInfo( type="Video", infoLabels={ "Title": name})
         liz.setProperty('mimetype', 'video/x-msvideo')
         contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
         liz.addContextMenuItems(contextmenuitems,replaceItems=False)
+        pl.add(u,liz)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
         return ok
 
@@ -291,5 +302,6 @@ elif mode==6:
     Play(url)
 elif mode==7:
     download(url)
-
+elif mode==8:
+    list_downloaded(url)
 xbmcplugin.endOfDirectory(int(sysarg))
