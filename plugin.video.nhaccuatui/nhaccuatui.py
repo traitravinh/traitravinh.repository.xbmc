@@ -62,7 +62,6 @@ def editSearch():
 def Search(url):
     try:
         if url.find('+')!=-1:
-            print 'came here'
             url = url.rstrip()
         else:
             searches = getStoredSearch()
@@ -317,7 +316,6 @@ sysarg=str(sys.argv[1])
 if mode==None or url==None or len(url)<1:
     Home()
 elif mode==1:
-    # SearchFirst(url)
     loadHistory(url)
 elif mode==2:
     Search(url)
