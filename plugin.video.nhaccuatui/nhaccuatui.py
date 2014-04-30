@@ -82,8 +82,12 @@ def Search(url):
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
+        print type(searches)
+        if len(searches)==0:
+            searches="['love songs']"
         return searches
     except:pass
+
 def saveStoredSearch(params):
     try:
         mysettings.setSetting('store_searches',repr(params))
@@ -316,6 +320,7 @@ sysarg=str(sys.argv[1])
 if mode==None or url==None or len(url)<1:
     Home()
 elif mode==1:
+    # SearchFirst(url)
     loadHistory(url)
 elif mode==2:
     Search(url)
