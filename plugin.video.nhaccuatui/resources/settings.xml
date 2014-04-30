@@ -2,6 +2,6 @@
 <settings>
 	<category label="General Settings">		
 		<setting id="download_path" type="folder" label="Download Path" default="" />		
-		<setting id="store_searches" value="[]"/>
+		<setting id="store_searches" value="['test']"/>
 	</category>	
 </settings>
