@@ -38,7 +38,7 @@
 
 <addon
   id="plugin.video.nhaccuatui"
-  version="1.0.5"
+  version="1.0.6"
   name="NhacCuaTui"
   provider-name="Wonnykc">
   <requires>

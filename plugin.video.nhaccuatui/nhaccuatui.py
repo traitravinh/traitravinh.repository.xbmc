@@ -8,8 +8,6 @@ import SimpleDownloader as downloader
 
 downloader = downloader.SimpleDownloader()
 mysettings = xbmcaddon.Addon(id='plugin.video.nhaccuatui')
-home = mysettings.getAddonInfo('path')
-searchHistory = xbmc.translatePath(os.path.join(home,'history.txt'))
 downloadpath = mysettings.getSetting('download_path')
 searchlink ='http://www.nhaccuatui.com/tim-kiem?q='
 home_link = 'http://www.nhaccuatui.com/'
@@ -28,8 +26,9 @@ def loadHistory(url):
         addDir('Search',url,2,logo,'',False)
         if len(searches)!=0:
             for s in searches:
-                addDir(s,url+s.replace(' ','+'),2,logo,'',True)
+                addDir(s,url+urllib.quote_plus(s),2,logo,'',True)
     except:pass
+
 def deleteSearch():
     try:
         searches = getStoredSearch()
@@ -39,18 +38,18 @@ def deleteSearch():
                 del(searches[i])
                 break
         saveStoredSearch(searches)
-        # xbmc.executebuiltin("Container.Refresh")
-    except:pass
+        # xbmc.executebuiltin('Container.Refresh')
+    except StopIteration:
+        pass
 
 def editSearch():
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb = xbmc.Keyboard(name, 'Enter search text')
         keyb.doModal()
         if (keyb.isConfirmed()):
             newsearch = keyb.getText()
-            print newsearch
             for i in range(0,len(searches)):
                 if searches[i]==name:
                     searches[i]=newsearch
@@ -59,38 +58,47 @@ def editSearch():
         Search(searchlink+newsearch)
     except:pass
 
+def getUserInput():
+    try:
+        searches = getStoredSearch()
+        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb.doModal()
+        if (keyb.isConfirmed()):
+                searchText = urllib.quote_plus(keyb.getText())
+        url = "http://www.nhaccuatui.com/tim-kiem?q="+ urllib.quote_plus(searchText)
+        if searchText!='':
+            searches = eval(searches)
+            searches = [urllib.unquote_plus(searchText)] + searches
+            saveStoredSearch(searches)
+        return url
+    except:pass
+
 def Search(url):
     try:
         if url.find('+')!=-1:
             url = url.rstrip()
         else:
-            searches = getStoredSearch()
-            keyb = xbmc.Keyboard('', 'Enter search text')
-            keyb.doModal()
-            if (keyb.isConfirmed()):
-                    searchText = urllib.quote_plus(keyb.getText())
-            url = "http://www.nhaccuatui.com/tim-kiem?q="+ searchText.replace(' ','+').rstrip()
-            if searchText!='':
-                with open(searchHistory,'a') as file:
-                    file.write('\n'+searchText.replace('+',' '))
-                    searches = eval(searches)
-                    searches = [searchText.replace('+',' ')] + searches
-                    saveStoredSearch(searches)
+            if len(re.compile('\w\s\w$').findall(url))==0:
+                if len(re.compile('=$').findall(url))==0:
+                    url=url
+                else:
+                    url = getUserInput()
+            else:
+                url = getUserInput()
         index_search(url)
     except: pass
 
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
-        print type(searches)
         if len(searches)==0:
-            searches="['love songs']"
+            searches="['hello']"
         return searches
     except:pass
 
-def saveStoredSearch(params):
+def saveStoredSearch(param):
     try:
-        mysettings.setSetting('store_searches',repr(params))
+        mysettings.setSetting('store_searches',repr(param))
     except:pass
 
 
@@ -204,10 +212,10 @@ def Play(url):
 def download(url):
     try:
         filename = re.compile('[a-zA-Z0-9-_]+\.\w+$').findall(url)[0]
-        type = re.compile('\.\w+$').findall(url)[0]
+        filetype = re.compile('\.\w+$').findall(url)[0]
         title_num = re.compile('(?:-|_|\+)\w*\.\w+$').findall(filename)[0]
         title = str(filename).replace(title_num,'')
-        filename = title+type
+        filename = title+filetype
         params = {"url": url, "download_path": downloadpath, "Title": title}
 
         if os.path.isfile(downloadpath+filename):
@@ -257,10 +265,9 @@ def addLink(name,url,mode,iconimage,cname):
         contextmenuitems = []
         if url.find('http://')!=-1:
             contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
-            liz.addContextMenuItems(contextmenuitems,replaceItems=False)
         else:
             contextmenuitems.append(('Delete','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
-            liz.addContextMenuItems(contextmenuitems,replaceItems=False)
+        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
         pl.add(u,liz)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
         return ok
