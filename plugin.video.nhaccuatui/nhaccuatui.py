@@ -17,23 +17,55 @@ logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
 pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
 def Home():
-    addDir('Search',searchlink,1,logo,'')
-    addDir('Downloaded Audio',downloadpath,8,logo,'')
-    addDir('Downloaded Video',downloadpath,8,logo,'')
+    addDir('Search',searchlink,1,logo,'',False)
+    addDir('Downloaded Audio',downloadpath,8,logo,'',False)
+    addDir('Downloaded Video',downloadpath,8,logo,'',False)
 
-def SearchFirst(url):
+def loadHistory(url):
     try:
-        hist = open(searchHistory)
-        addDir('Search',searchlink,2,logo,'')
-        for text in hist:
-            addDir(text,searchlink+text.replace(' ','+'),2,logo,'')
+        searches = getStoredSearch()
+        searches = eval(searches)
+        addDir('Search',url,2,logo,'',False)
+        if len(searches)!=0:
+            for s in searches:
+                addDir(s,url+s.replace(' ','+'),2,logo,'',True)
+    except:pass
+def deleteSearch():
+    try:
+        searches = getStoredSearch()
+        searches = eval(searches)
+        for i in range(0,len(searches)):
+            if searches[i]==name:
+                del(searches[i])
+                break
+        saveStoredSearch(searches)
+        # xbmc.executebuiltin("Container.Refresh")
+    except:pass
+
+def editSearch():
+    try:
+        searches = getStoredSearch()
+        searches = eval(searches)
+        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb.doModal()
+        if (keyb.isConfirmed()):
+            newsearch = keyb.getText()
+            print newsearch
+            for i in range(0,len(searches)):
+                if searches[i]==name:
+                    searches[i]=newsearch
+        saveStoredSearch(searches)
+        newsearch=urllib.quote_plus(newsearch)
+        Search(searchlink+newsearch)
     except:pass
 
 def Search(url):
     try:
         if url.find('+')!=-1:
+            print 'came here'
             url = url.rstrip()
         else:
+            searches = getStoredSearch()
             keyb = xbmc.Keyboard('', 'Enter search text')
             keyb.doModal()
             if (keyb.isConfirmed()):
@@ -42,10 +74,21 @@ def Search(url):
             if searchText!='':
                 with open(searchHistory,'a') as file:
                     file.write('\n'+searchText.replace('+',' '))
-
+                    searches = eval(searches)
+                    searches = [searchText.replace('+',' ')] + searches
+                    saveStoredSearch(searches)
         index_search(url)
     except: pass
 
+def getStoredSearch():
+    try:
+        searches = mysettings.getSetting('store_searches')
+        return searches
+    except:pass
+def saveStoredSearch(params):
+    try:
+        mysettings.setSetting('store_searches',repr(params))
+    except:pass
 
 
 def index_search(url):
@@ -60,7 +103,7 @@ def index_search(url):
             atitle = a_soup('a')[0]['title'].encode('utf-8')
             acount=a_soup('span')[0].contents[0]
             title = atitle + str(acount)
-            addDir(title,alink,4,logo,atitle)
+            addDir(title,alink,4,logo,atitle,False)
     except:pass
 
 def search_return(url,cname):
@@ -90,7 +133,7 @@ def search_return(url,cname):
             except:pass
             atitle = asoup('a',{'class':subkey})[0]['title'].encode('utf-8')
 
-            addDir(atitle,alink,5,image,cname)
+            addDir(atitle,alink,5,image,cname,False)
 
         box_pageview = soup('div',{'class':'box_pageview'})
         pages = BeautifulSoup(str(box_pageview[0])).findAll('a')
@@ -99,7 +142,7 @@ def search_return(url,cname):
             plink = psoup('a')[0]['href']
             ptitle = psoup('a')[0].contents[0]
 
-            addDir(ptitle.encode('utf-8'),plink,4,logo,cname)
+            addDir(ptitle.encode('utf-8'),plink,4,logo,cname,False)
     except:pass
 
 def explore(url):
@@ -190,11 +233,16 @@ def list_downloaded(url):
             addLink(a,url+a,6,logo,'')
     except:pass
 
-def addDir(name,url,mode,iconimage,cname):
+def addDir(name,url,mode,iconimage,cname,edit):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
+    contextmenuitems = []
+    if edit:
+        contextmenuitems.append(('Delete Search','XBMC.Container.Update(%s?url=%s&mode=10&name=%s)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url),urllib.quote_plus(name))))
+        contextmenuitems.append(('Edit Search','XBMC.Container.Update(%s?url=%s&mode=11&name=%s)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url),urllib.quote_plus(name))))
+        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
@@ -238,6 +286,7 @@ name=None
 mode=None
 iconimage=None
 cname=None
+edit=None
 
 try:
         url=urllib.unquote_plus(params["url"])
@@ -259,12 +308,17 @@ try:
         mode=int(params["mode"])
 except:
         pass
+try:
+        edit = bool(params["edit"])
+except:
+        pass
 
 sysarg=str(sys.argv[1])
 if mode==None or url==None or len(url)<1:
     Home()
 elif mode==1:
-    SearchFirst(url)
+    # SearchFirst(url)
+    loadHistory(url)
 elif mode==2:
     Search(url)
 elif mode==3:
@@ -281,4 +335,8 @@ elif mode==8:
     list_downloaded(url)
 elif mode==9:
     delete(url)
+elif mode==10:
+    deleteSearch()
+elif mode==11:
+    editSearch()
 xbmcplugin.endOfDirectory(int(sysarg))
