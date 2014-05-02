@@ -6,10 +6,10 @@ import xbmcaddon,xbmcplugin,xbmcgui
 import urlresolver
 # from net import Net
 # from t0mm0.common.net import Net
-import SimpleDownloader as downloader
+# import SimpleDownloader as downloader
 
 
-downloader = downloader.SimpleDownloader()
+# downloader = downloader.SimpleDownloader()
 
 root_link = 'http://www.superphim.com'
 mob_root = 'http://www.phimmobile.com'
@@ -19,7 +19,7 @@ mysettings = xbmcaddon.Addon(id='plugin.video.superphim')
 downloadpath = mysettings.getSetting('download_path')
 home = mysettings.getAddonInfo('path')
 logo = xbmc.translatePath(os.path.join(home, 'icon.png'))
-downloadpath = xbmc.translatePath(os.path.join(home,'/download'))
+# downloadpath = xbmc.translatePath(os.path.join(home,'/download'))
 
 def Home():
     addDir('Search',searchlink,5,logo,False)
@@ -29,32 +29,6 @@ def Home():
     addDir('Phim Vietnam','http://www.superphim.com/Phim-Viet-Nam-movies-141-page-1.html',1,logo,False)
     addDir('Hai Kich','http://www.superphim.com/Hai-Kich-Viet-Nam-movies-83-page-1.html',1,logo,False)
 
-# def SearchFirst(url):
-#     try:
-#         print url
-#         hist = open(searchHistory)
-#         addDir('Search',searchlink,6,logo)
-#         for text in hist:
-#             # print (searchlink+text).replace(' ','+')#+'/page-1.html'#.rstrip()+'&tab=2'
-#             addDir(text,(searchlink+text).replace(' ','+').rstrip(),1,logo) #+'/page-1.html',6,logo)
-#     except:pass
-# def Search(url):
-#     try:
-#         if url.find('html')!=-1:
-#             url =url
-#         else:
-#             keyb = xbmc.Keyboard('', 'Enter search text')
-#             keyb.doModal()
-#             if (keyb.isConfirmed()):
-#                     searchText = urllib.quote_plus(keyb.getText())
-#             url = searchlink+ searchText.replace(' ','+').rstrip()#+'/page-1.html'#.rstrip()+'&tab=2'
-#
-#             if searchText!='':
-#                 with open(searchHistory,'a') as file:
-#                     file.write('\n'+searchText.replace('+',' '))
-#
-#         index(url)
-#     except: pass
 def loadHistory(url):
     try:
         searches = getStoredSearch()
