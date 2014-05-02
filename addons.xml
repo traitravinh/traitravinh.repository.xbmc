@@ -38,7 +38,7 @@
 
 <addon
   id="plugin.video.nhaccuatui"
-  version="1.0.6"
+  version="1.0.7"
   name="NhacCuaTui"
   provider-name="Wonnykc">
   <requires>
@@ -113,7 +113,7 @@
 
 <addon
   id="plugin.video.superphim"
-  version="1.0.0"
+  version="1.0.1"
   name="superphim"
   provider-name="traitravinh">
   <requires>

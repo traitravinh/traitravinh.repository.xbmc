@@ -3,46 +3,139 @@ __author__ = 'traitravinh'
 import urllib, urllib2, re, StringIO, os, sys, base64, gzip, string
 from bs4 import BeautifulSoup
 import xbmcaddon,xbmcplugin,xbmcgui
+import urlresolver
+# from net import Net
+# from t0mm0.common.net import Net
+import SimpleDownloader as downloader
+
+
+downloader = downloader.SimpleDownloader()
 
 root_link = 'http://www.superphim.com'
 mob_root = 'http://www.phimmobile.com'
 mob_link = 'http://www.phimmobile.com/index.php?action=play&id='
 searchlink = 'http://www.superphim.com/search.php?q='
 mysettings = xbmcaddon.Addon(id='plugin.video.superphim')
+downloadpath = mysettings.getSetting('download_path')
 home = mysettings.getAddonInfo('path')
 logo = xbmc.translatePath(os.path.join(home, 'icon.png'))
-searchHistory = xbmc.translatePath(os.path.join(home,'history.txt'))
+downloadpath = xbmc.translatePath(os.path.join(home,'/download'))
 
 def Home():
-    addDir('Search',searchlink,5,logo)
-    addDir('Phim Moi Nhat','http://www.superphim.com/phim-moi-update.html',1,logo)
-    addDir('Phim HK & TQ','http://www.superphim.com/Phim-Hong-Kong-movies-72-page-1.html',1,logo)
-    addDir('Phim Han Quoc','http://www.superphim.com/Phim-Han-Quoc-movies-107-page-1.html',1,logo)
-    addDir('Phim Vietnam','http://www.superphim.com/Phim-Viet-Nam-movies-141-page-1.html',1,logo)
-    addDir('Hai Kich','http://www.superphim.com/Hai-Kich-Viet-Nam-movies-83-page-1.html',1,logo)
+    addDir('Search',searchlink,5,logo,False)
+    addDir('Phim Moi Nhat','http://www.superphim.com/phim-moi-update.html',1,logo,False)
+    addDir('Phim HK & TQ','http://www.superphim.com/Phim-Hong-Kong-movies-72-page-1.html',1,logo,False)
+    addDir('Phim Han Quoc','http://www.superphim.com/Phim-Han-Quoc-movies-107-page-1.html',1,logo,False)
+    addDir('Phim Vietnam','http://www.superphim.com/Phim-Viet-Nam-movies-141-page-1.html',1,logo,False)
+    addDir('Hai Kich','http://www.superphim.com/Hai-Kich-Viet-Nam-movies-83-page-1.html',1,logo,False)
 
-def SearchFirst(url):
+# def SearchFirst(url):
+#     try:
+#         print url
+#         hist = open(searchHistory)
+#         addDir('Search',searchlink,6,logo)
+#         for text in hist:
+#             # print (searchlink+text).replace(' ','+')#+'/page-1.html'#.rstrip()+'&tab=2'
+#             addDir(text,(searchlink+text).replace(' ','+').rstrip(),1,logo) #+'/page-1.html',6,logo)
+#     except:pass
+# def Search(url):
+#     try:
+#         if url.find('html')!=-1:
+#             url =url
+#         else:
+#             keyb = xbmc.Keyboard('', 'Enter search text')
+#             keyb.doModal()
+#             if (keyb.isConfirmed()):
+#                     searchText = urllib.quote_plus(keyb.getText())
+#             url = searchlink+ searchText.replace(' ','+').rstrip()#+'/page-1.html'#.rstrip()+'&tab=2'
+#
+#             if searchText!='':
+#                 with open(searchHistory,'a') as file:
+#                     file.write('\n'+searchText.replace('+',' '))
+#
+#         index(url)
+#     except: pass
+def loadHistory(url):
     try:
-        hist = open(searchHistory)
-        addDir('Search',searchlink,6,logo)
-        for text in hist:
-            addDir(text,(searchlink+text).replace(' ','+').rstrip(),1,logo) #+'/page-1.html',6,logo)
+        searches = getStoredSearch()
+        searches = eval(searches)
+        addDir('Search',url,6,logo,False)
+        if len(searches)!=0:
+            for s in searches:
+                addDir(s,url+urllib.quote_plus(s),1,logo,True)
     except:pass
+
+def deleteSearch():
+    try:
+        searches = getStoredSearch()
+        searches = eval(searches)
+        for i in range(0,len(searches)):
+            if searches[i]==name:
+                del(searches[i])
+                break
+        saveStoredSearch(searches)
+        # xbmc.executebuiltin('Container.Refresh')
+    except StopIteration:
+        pass
+
+def editSearch():
+    try:
+        searches = getStoredSearch()
+        searches = eval(searches)
+        keyb = xbmc.Keyboard(name, 'Enter search text')
+        keyb.doModal()
+        if (keyb.isConfirmed()):
+            newsearch = keyb.getText()
+            for i in range(0,len(searches)):
+                if searches[i]==name:
+                    searches[i]=newsearch
+        saveStoredSearch(searches)
+        newsearch=urllib.quote_plus(newsearch)
+        Search(searchlink+newsearch)
+    except:pass
+
+def getUserInput():
+    try:
+        searches = getStoredSearch()
+        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb.doModal()
+        if (keyb.isConfirmed()):
+            searchText = urllib.quote_plus(keyb.getText())
+            url = searchlink+ searchText
+        if searchText!='':
+            searches = eval(searches)
+            searches = [urllib.unquote_plus(searchText)] + searches
+            saveStoredSearch(searches)
+        return url
+    except:pass
+
 def Search(url):
     try:
-        if url.find('html')!=-1:
-            url =url
+        if url.find('+')!=-1:
+            url = url.rstrip()
         else:
-            keyb = xbmc.Keyboard('', 'Enter search text')
-            keyb.doModal()
-            if (keyb.isConfirmed()):
-                    searchText = urllib.quote_plus(keyb.getText())
-            url = searchlink+ searchText.replace(' ','+').rstrip()
-            if searchText!='':
-                with open(searchHistory,'a') as file:
-                    file.write('\n'+searchText.replace('+',' '))
+            if len(re.compile('\w\s\w$').findall(url))==0:
+                if len(re.compile('=$').findall(url))==0:
+                    url=url
+                else:
+                    url = getUserInput()
+            else:
+                url = getUserInput()
         index(url)
     except: pass
+
+def getStoredSearch():
+    try:
+        searches = mysettings.getSetting('store_searches')
+        if len(searches)==0:
+            searches="['hello']"
+        return searches
+    except:pass
+
+def saveStoredSearch(param):
+    try:
+        mysettings.setSetting('store_searches',repr(param))
+    except:pass
 
 
 def index(url):
@@ -55,15 +148,16 @@ def index(url):
             tLink = (tSoup('a')[0]['href']).lstrip('.')
             tTitle = tSoup('strong')[0].contents[0]
             tImage = (tSoup('img')[0]['src']).replace(' ', '%20')
-            addDir(tTitle.encode('utf-8'),root_link+tLink,2,root_link + tImage)
+            addDir(tTitle.encode('utf-8'),root_link+tLink,2,root_link + tImage,False)
         page_soup = soup.findAll('a',{'class':'pagelink'})
         for p in page_soup:
             pSoup = BeautifulSoup(str(p))
             pLink = (pSoup('a')[0]['href']).lstrip('.')
             pTitle = pSoup('a')[0].contents[0]
-            addDir(pTitle,root_link + pLink,1,logo)
+            addDir(pTitle,root_link + pLink,1,logo,False)
     except:
         pass
+
 
 def mirrors(url):
     try:
@@ -74,12 +168,12 @@ def mirrors(url):
             try:
                 m_soup = BeautifulSoup(str(m))
                 mName = m_soup('strong')[0].contents[0]
-                addDir(mName,url,3,iconimage)
+                addDir(mName,url,3,iconimage,False)
             except:
                 pass
+
     except:
         pass
-
 def episodes(url):
     try:
         link = urllib2.urlopen(url).read()
@@ -119,17 +213,36 @@ def loadVideos(url,mirror):
         play(nUrl, mirrorName)
     except:pass
 
+def download(url):
+    nUrl, mirrorName = videoID(url)
+    if mirrorName == 'dailymotion':
+        hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(nUrl))
+        videoId=hostedmedia.resolve()
+            # videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
+    elif mirrorName == 'youtube':
+        hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(nUrl))
+        videoId = hostedmedia.resolve()
+    params = { "url": videoId, "download_path": downloadpath, "Title": name }
+    downloader.download(str(name)+".mp4", params)
+
+
 def play(url,mirror):
     try:
+
         if mirror == 'dailymotion':
-            videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
+            hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(url))
+            videoId=hostedmedia.resolve()
+            # videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
         elif mirror == 'youtube':
-            videoId = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(url).replace('?','')
-        if mysettings.getSetting('play')=='true':
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=videoId))
-        else:
-            listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-            xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
+            hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(url))
+            videoId = hostedmedia.resolve()
+            # videoId = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(url).replace('?','')
+
+        # if mysettings.getSetting('play')=='true':
+        listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
+        listitem.setPath(videoId)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
     except:pass
 
 def GetContent(url):
@@ -160,6 +273,7 @@ def GetDirVideoUrl(url,referr):
         'Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
         ('Accept-Encoding', 'gzip, deflate'),
         ('Referer',referr),
+        #('Content-Type', 'application/x-www-form-urlencoded'),
         ('User-Agent', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'),
         ('Connection', 'keep-alive'),
         ('Accept-Language', 'en-us,en;q=0.5'),
@@ -174,6 +288,7 @@ def GetContentMob(url):
         'Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
         ('Accept-Encoding', 'gzip, deflate'),
         ('Referer',"http://www.phimmobile.com/index.php"),
+        #('Content-Type', 'application/x-www-form-urlencoded'),
         ('User-Agent', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'),
         ('Connection', 'keep-alive'),
         ('Accept-Language', 'en-us,en;q=0.5'),
@@ -189,19 +304,28 @@ def GetContentMob(url):
     uSock.close()
     return response
 
-def addDir(name,url,mode,iconimage):
+def addDir(name,url,mode,iconimage,edit):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
+    contextmenuitems = []
+    if edit:
+        contextmenuitems.append(('Delete Search','XBMC.Container.Update(%s?url=%s&mode=8&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(name))))
+        contextmenuitems.append(('Edit Search','XBMC.Container.Update(%s?url=%s&mode=9&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(name))))
+        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
 def addLink(name,url,mode,mirror,iconimage):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&mirror="+urllib.quote_plus(mirror)+"&iconimage="+urllib.quote_plus(iconimage)
+    # contextmenuitems=[]
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
+    # contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=8&mirror=%s&iconimage=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(mirror),urllib.quote_plus(iconimage))))
+
+    # liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 
@@ -229,6 +353,7 @@ name=None
 mode=None
 mirror=None
 iconimage=None
+edit=None
 
 try:
         url=urllib.unquote_plus(params["url"])
@@ -250,6 +375,10 @@ try:
         mirror=urllib.unquote_plus(params["mirror"])
 except:
         pass
+try:
+        edit = bool(params["edit"])
+except:
+        pass
 
 sysarg=str(sys.argv[1])
 if mode==None or url==None or len(url)<1:
@@ -263,8 +392,27 @@ elif mode==3:
 elif mode==4:
     loadVideos(url,mirror)
 elif mode==5:
-    SearchFirst(url)
+    loadHistory(url)
 elif mode==6:
     Search(url)
+elif mode==7:
+    download(url)
+elif mode==8:
+    deleteSearch()
+elif mode==9:
+    editSearch()
+
 
 xbmcplugin.endOfDirectory(int(sysarg))
+
+
+#test
+# index('http://www.superphim.com/Phim-Hong-Kong-movies-72-page-1.html')
+# mirrors('http://www.superphim.com/vua-phim-truong-the-movie-tycoon-online-5692.html')
+# episodes('http://www.superphim.com/vua-phim-truong-the-movie-tycoon-online-5692.html', 'Mirror 1:')
+# GetContent('http://www.phimmobile.com/index.php?action=play&id=832745')
+# GetContent('http://www.phimmobile.com/index.php?action=play&id=832898')
+# GetVideoMobileLink('http://www.phimmobile.com/index.php?action=play&id=832898')
+# GetVideoMobileLink('http://www.phimmobile.com/index.php?action=play&id=832745')
+# videoID('http://www.phimmobile.com/index.php?action=play&id=832898')
+# videoID('http://www.phimmobile.com/index.php?action=play&id=832745')

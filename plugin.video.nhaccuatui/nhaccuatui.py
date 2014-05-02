@@ -64,8 +64,8 @@ def getUserInput():
         keyb = xbmc.Keyboard('', 'Enter search text')
         keyb.doModal()
         if (keyb.isConfirmed()):
-                searchText = urllib.quote_plus(keyb.getText())
-        url = "http://www.nhaccuatui.com/tim-kiem?q="+ urllib.quote_plus(searchText)
+            searchText = urllib.quote_plus(keyb.getText())
+            url = searchlink+searchText
         if searchText!='':
             searches = eval(searches)
             searches = [urllib.unquote_plus(searchText)] + searches

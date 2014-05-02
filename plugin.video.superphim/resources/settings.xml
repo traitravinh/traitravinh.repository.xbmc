@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 	<category label="General Settings">
-		<setting id="play" type="bool" label="Auto Play Next(right click - play from here)" default="false"/>
-        <!--setting id="hq" type="enum" label="Quality" values="Medium|Max" default="1"/> -->      
-	</category>
-	<!--category label="30100">
-		<setting id="tv24_http" type="bool" label="30101" default="false"/>
-	</category-->
+		<setting id="download_path" type="folder" label="Download Path" default="" />		
+		<setting id="store_searches" value="[]"/>
+	</category>	
 </settings>
