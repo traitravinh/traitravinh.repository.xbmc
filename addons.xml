@@ -2,7 +2,7 @@
 <addons>
 <addon
   id="plugin.video.baobongda"
-  version="1.0.0"
+  version="1.0.1"
   name="BaoBongDa"
   provider-name="traitravinh">
   <requires>
