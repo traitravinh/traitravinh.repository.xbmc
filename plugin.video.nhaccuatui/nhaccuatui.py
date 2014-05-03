@@ -231,6 +231,7 @@ def delete(url):
         dialog = xbmcgui.Dialog()
         if dialog.yesno('Delete','Delete File?'):
             os.remove(url)
+        xbmc.excutebuiltin('Container Refesh')
     except:pass
 
 def list_downloaded(url):
