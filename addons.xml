@@ -95,7 +95,7 @@
 
 <addon
   id="plugin.video.phimtructuyenhd"
-  version="1.0.0"
+  version="1.0.1"
   name="phimtructuyenhd.com"
   provider-name="traitravinh">
   <requires>
