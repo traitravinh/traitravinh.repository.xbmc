@@ -5,8 +5,7 @@ from bs4 import BeautifulSoup
 
 mysettings = xbmcaddon.Addon(id='plugin.video.phimtructuyenhd')
 home = mysettings.getAddonInfo('path')
-searchHistory = xbmc.translatePath(os.path.join(home,'history.txt'))
-testf4m = xbmc.translatePath(os.path.join(home,'hd.txt'))
+downloadpath = mysettings.getSetting('download_path')
 searchlink = 'http://m.phimtructuyenhd.com/index.php?name=tim-kiem&str='
 home_link = 'http://m.phimtructuyenhd.com'
 logo ='http://www.iconki.com/icons/3D/Mimetypes-icons/movie.png'
@@ -21,12 +20,19 @@ def index(url):
             lititle = BeautifulSoup(str(li))('a')[0]['title']
             liimage = BeautifulSoup(str(li))('img')[0]['src'].replace('/m.','/') #mobile link is not working
 
-            addDir(lititle.encode('utf-8'),lilink,3,liimage,None,'')
+            addDir(lititle.encode('utf-8'),lilink,3,liimage,None,'',False)
+
+        option_value = soup('option')
+        for ov in option_value:
+            ovlink = BeautifulSoup(str(ov))('option')[0]['value']
+            ovtitle = BeautifulSoup(str(ov))('option')[0].contents[0]
+
+            addDir(ovtitle,ovlink,2,logo,None,'',False)
     except:pass
 
 def home():
     try:
-        addDir('Search',searchlink,6,logo,None,'')
+        addDir('Search',searchlink,6,logo,None,'',False)
         link = urllib2.urlopen(home_link).read()
         soup = BeautifulSoup(link.decode('utf-8'))
         navbar = soup('div',{'data-role':'navbar'})
@@ -34,7 +40,8 @@ def home():
         for n in range(1,len(navtitle)-1):
             nlink = BeautifulSoup(str(navtitle[n]))('a')[0]['href']
             ntitle = BeautifulSoup(str(navtitle[n]))('a')[0].contents[0]
-            addDir(ntitle.encode('utf-8'),nlink,1,logo,None,'')
+
+            addDir(ntitle.encode('utf-8'),nlink,1,logo,None,'',False)
     except:pass
 
 def index_nav(url):
@@ -48,7 +55,8 @@ def index_nav(url):
             if lilink.find(home_link)==-1:
                 lilink = home_link+lilink
             lititle = BeautifulSoup(str(li_a[li]))('a')[0].contents[0]
-            addDir(lititle.encode('utf-8'),lilink,2,logo,None,'')
+
+            addDir(lititle.encode('utf-8'),lilink,2,logo,None,'',False)
 
     except:pass
 
@@ -60,7 +68,7 @@ def server(url):
         index_num = 0
         for s in svname:
             sname = BeautifulSoup(str(s))('span')[0].contents[0]
-            addDir(sname,url,4,iconimage,index_num,sname)
+            addDir(sname,url,4,iconimage,index_num,sname,False)
             index_num = index_num+1
     except:pass
 
@@ -73,6 +81,7 @@ def episode(url):
         for e in eps:
             elink = BeautifulSoup(str(e))('a')[0]['href']
             etitle = BeautifulSoup(str(e)).a.next.next.next.string
+
             addLink(etitle.encode('utf-8'),elink,5,mirror,iconimage)
     except:pass
 
@@ -98,46 +107,101 @@ def PlayVideo(url,mirror):
             vUrl = url
         else:
             vUrl=url
-        if mysettings.getSetting('descriptions')=='true':
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=str(vUrl)))
-        else:
-            listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-            xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
+
+        listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=str(vUrl)))
+        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
     except:pass
 
-
-def SearchFirst(url):
+def loadHistory(url):
     try:
-        videofile = open(testf4m,'r')
-        for text in videofile:
-            videopart = re.compile('<media bitrate="1000" url="mp4:(.+?)" height="480"').findall(text)
-        hist = open(searchHistory)
-        addDir('Search',searchlink,7,logo,None,'')
-        for text in hist:
-            addDir(text,(searchlink+text).replace(' ','+').rstrip(),2,logo,None,'') #+'/page-1.html',6,logo)
+        searches = getStoredSearch()
+        searches = eval(searches)
+        addDir('Search',url,7,logo,None,'',False)
+        if len(searches)!=0:
+            indexnum=0
+            for s in searches:
+                addDir(s,url+urllib.quote_plus(s),2,logo,indexnum,'',True)
+                indexnum=indexnum+1
+    except:pass
+
+def deleteSearch():
+    try:
+        searches = getStoredSearch()
+        searches = eval(searches)
+        del(searches[inum])
+        saveStoredSearch(searches)
+        # xbmc.executebuiltin('Container.Refresh')
+    except StopIteration:
+        pass
+
+def editSearch():
+    try:
+        searches = getStoredSearch()
+        searches = eval(searches)
+        keyb = xbmc.Keyboard(name, 'Enter search text')
+        keyb.doModal()
+        if (keyb.isConfirmed()):
+            newsearch = keyb.getText()
+            searches[inum]=newsearch
+            saveStoredSearch(searches)
+            newsearch=urllib.quote_plus(newsearch)
+            Search(searchlink+newsearch)
+    except:pass
+
+def getUserInput():
+    try:
+        searches = getStoredSearch()
+        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb.doModal()
+        if (keyb.isConfirmed()):
+            searchText = urllib.quote_plus(keyb.getText())
+            url = searchlink+ searchText
+        if searchText!='':
+            searches = eval(searches)
+            searches = [urllib.unquote_plus(searchText)] + searches
+            saveStoredSearch(searches)
+        return url
     except:pass
 
 def Search(url):
     try:
         if url.find('html')!=-1:
-            url =url
+            url = url.rstrip()
         else:
-            keyb = xbmc.Keyboard('', 'Enter search text')
-            keyb.doModal()
-            if (keyb.isConfirmed()):
-                    searchText = urllib.quote_plus(keyb.getText())
-            url = searchlink+ searchText.replace(' ','+').rstrip()
-            if searchText!='':
-                with open(searchHistory,'a') as file:
-                    file.write('\n'+searchText.replace('+',' '))
+            if len(re.compile('\w\s\w$').findall(url))==0:
+                if len(re.compile('=$').findall(url))==0:
+                    url=url
+                else:
+                    url = getUserInput()
+            else:
+                url = getUserInput()
         index(url)
     except: pass
 
-def addDir(name, url, mode, iconimage, inum,mirror):
+def getStoredSearch():
+    try:
+        searches = mysettings.getSetting('store_searches')
+        if len(searches)==0:
+            searches="['hello']"
+        return searches
+    except:pass
+
+def saveStoredSearch(param):
+    try:
+        mysettings.setSetting('store_searches',repr(param))
+    except:pass
+
+def addDir(name, url, mode, iconimage, inum,mirror,edit):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)+"&mirror="+urllib.quote_plus(mirror)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
+    contextmenuitems = []
+    if edit:
+        contextmenuitems.append(('Delete Search','XBMC.Container.Update(%s?url=%s&mode=8&name=%s&inum=%s)'%('plugin://plugin.video.phimtructuyenhd',urllib.quote_plus(url),urllib.quote_plus(name),urllib.quote_plus(str(inum)))))
+        contextmenuitems.append(('Edit Search','XBMC.Container.Update(%s?url=%s&mode=9&name=%s&inum=%s)'%('plugin://plugin.video.phimtructuyenhd',urllib.quote_plus(url),urllib.quote_plus(name),urllib.quote_plus(str(inum)))))
+        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
@@ -176,6 +240,7 @@ mode=None
 mirror=None
 iconimage=None
 inum=None
+edit=None
 
 try:
         url=urllib.unquote_plus(params["url"])
@@ -201,6 +266,10 @@ try:
         inum=int(params["inum"])
 except:
         pass
+try:
+        edit = bool(params["edit"])
+except:
+        pass
 
 sysarg=str(sys.argv[1])
 
@@ -217,8 +286,11 @@ elif mode==4:
 elif mode==5:
     videolink(url)
 elif mode==6:
-    SearchFirst(url)
+    loadHistory(url)
 elif mode==7:
     Search(url)
-
+elif mode==8:
+    deleteSearch()
+elif mode==9:
+    editSearch()
 xbmcplugin.endOfDirectory(int(sysarg))
