@@ -39,7 +39,7 @@
 <addon
   id="plugin.video.nhaccuatui"
   version="1.0.8"
-  name="NhacCuaTui"
+  name="[COLOR FF00BFFF]NhacCuaTui[/COLOR]"
   provider-name="Wonnykc">
   <requires>
 	<import addon="xbmc.python" version="2.1.0" />
@@ -60,7 +60,7 @@
 <addon
   id="plugin.video.ourmatch_net"
   version="1.0.0"
-  name="ourmatch.net"
+  name="[COLOR white]Our[/COLOR][COLOR FFF4A460]Match[/COLOR][COLOR white].net[/COLOR]"
   provider-name="traitravinh">
   <requires>
   </requires>
@@ -78,7 +78,7 @@
 <addon
   id="plugin.video.phatam"
   version="1.0.0"
-  name="phatam"
+  name="[COLOR white]phatam[/COLOR]"
   provider-name="traitravinh">
   <requires>
   </requires>
@@ -96,7 +96,7 @@
 <addon
   id="plugin.video.phimtructuyenhd"
   version="1.0.1"
-  name="phimtructuyenhd.com"
+  name="[COLOR red]Phim[/COLOR][COLOR FF0000FF]Truc[/COLOR][COLOR FF1E90FF]Tuyen[/COLOR][COLOR FFDAA520]HD[/COLOR]"
   provider-name="traitravinh">
   <requires>
   </requires>

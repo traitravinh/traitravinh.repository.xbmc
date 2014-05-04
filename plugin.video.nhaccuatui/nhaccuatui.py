@@ -15,32 +15,28 @@ logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
 pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
 def Home():
-    addDir('Search',searchlink,1,logo,'',False)
-    addDir('Downloaded Audio',downloadpath,8,logo,'',False)
-    addDir('Downloaded Video',downloadpath,8,logo,'',False)
+    addDir('[COLOR FF00BFFF]Search[/COLOR]',searchlink,1,logo,'',False,None)
+    addDir('Downloaded [COLOR blue]Audios[/COLOR]',downloadpath,8,logo,'',False,None)
+    addDir('Downloaded [COLOR pink]Videos[/COLOR]',downloadpath,8,logo,'',False,None)
 
 def loadHistory(url):
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        addDir('Search',url,2,logo,'',False)
+        addDir('[COLOR FF00BFFF]Search[/COLOR]',url,2,logo,'',False,None)
         if len(searches)!=0:
-            for s in searches:
-                addDir(s,url+urllib.quote_plus(s),2,logo,'',True)
+            for i in range(0,len(searches)):
+                addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,'',True,i)
     except:pass
 
 def deleteSearch():
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        for i in range(0,len(searches)):
-            if searches[i]==name:
-                del(searches[i])
-                break
+        del(searches[inum])
         saveStoredSearch(searches)
         # xbmc.executebuiltin('Container.Refresh')
-    except StopIteration:
-        pass
+    except:pass
 
 def editSearch():
     try:
@@ -50,9 +46,7 @@ def editSearch():
         keyb.doModal()
         if (keyb.isConfirmed()):
             newsearch = keyb.getText()
-            for i in range(0,len(searches)):
-                if searches[i]==name:
-                    searches[i]=newsearch
+            searches[inum]=newsearch
         saveStoredSearch(searches)
         newsearch=urllib.quote_plus(newsearch)
         Search(searchlink+newsearch)
@@ -114,7 +108,7 @@ def index_search(url):
             atitle = a_soup('a')[0]['title'].encode('utf-8')
             acount=a_soup('span')[0].contents[0]
             title = atitle + str(acount)
-            addDir(title,alink,4,logo,atitle,False)
+            addDir(title,alink,4,logo,atitle,False,None)
     except:pass
 
 def search_return(url,cname):
@@ -143,8 +137,7 @@ def search_return(url,cname):
                 image = aimage
             except:pass
             atitle = asoup('a',{'class':subkey})[0]['title'].encode('utf-8')
-
-            addDir(atitle,alink,5,image,cname,False)
+            addDir(atitle,alink,5,image,cname,False,None)
 
         box_pageview = soup('div',{'class':'box_pageview'})
         pages = BeautifulSoup(str(box_pageview[0])).findAll('a')
@@ -152,8 +145,7 @@ def search_return(url,cname):
             psoup = BeautifulSoup(str(p))
             plink = psoup('a')[0]['href']
             ptitle = psoup('a')[0].contents[0]
-
-            addDir(ptitle.encode('utf-8'),plink,4,logo,cname,False)
+            addDir(ptitle.encode('utf-8'),plink,4,logo,cname,False,None)
     except:pass
 
 def explore(url):
@@ -198,7 +190,6 @@ def getMediaTitle(url):
         finaltitle=[]
         for content in match:
             finaltitle.append(content.replace('<![CDATA[','').replace(']]>',''))
-
         return finaltitle
     except:pass
 
@@ -217,7 +208,6 @@ def download(url):
         title = str(filename).replace(title_num,'')
         filename = title+filetype
         params = {"url": url, "download_path": downloadpath, "Title": title}
-
         if os.path.isfile(downloadpath+filename):
             dialog = xbmcgui.Dialog()
             if dialog.yesno('Download message','File exists! re-download?'):
@@ -228,6 +218,7 @@ def download(url):
 
 def delete(url):
     try:
+        print url
         dialog = xbmcgui.Dialog()
         if dialog.yesno('Delete','Delete File?'):
             os.remove(url)
@@ -245,15 +236,15 @@ def list_downloaded(url):
             addLink(a,url+a,6,logo,'')
     except:pass
 
-def addDir(name,url,mode,iconimage,cname,edit):
+def addDir(name,url,mode,iconimage,cname,edit,inum):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     contextmenuitems = []
     if edit:
-        contextmenuitems.append(('Delete Search','XBMC.Container.Update(%s?url=%s&mode=10&name=%s)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url),urllib.quote_plus(name))))
-        contextmenuitems.append(('Edit Search','XBMC.Container.Update(%s?url=%s&mode=11&name=%s)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url),urllib.quote_plus(name))))
+        contextmenuitems.append(('[COLOR red]Delete[/COLOR] [COLOR FF00BFFF]Search[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=10&name=%s&inum=%d)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url),urllib.quote_plus(name),inum)))
+        contextmenuitems.append(('[COLOR yellow]Edit[/COLOR] [COLOR FF00BFFF]Search[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=11&name=%s&inum=%d)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url),urllib.quote_plus(name),inum)))
         liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
@@ -265,9 +256,9 @@ def addLink(name,url,mode,iconimage,cname):
         liz.setProperty('mimetype', 'video/x-msvideo')
         contextmenuitems = []
         if url.find('http://')!=-1:
-            contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+            contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
         else:
-            contextmenuitems.append(('Delete','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+            contextmenuitems.append(('[COLOR red]Delete[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
         liz.addContextMenuItems(contextmenuitems,replaceItems=False)
         pl.add(u,liz)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
@@ -298,6 +289,7 @@ mode=None
 iconimage=None
 cname=None
 edit=None
+inum=None
 
 try:
         url=urllib.unquote_plus(params["url"])
@@ -323,12 +315,15 @@ try:
         edit = bool(params["edit"])
 except:
         pass
+try:
+        inum=int(params["inum"])
+except:
+        pass
 
 sysarg=str(sys.argv[1])
 if mode==None or url==None or len(url)<1:
     Home()
 elif mode==1:
-    # SearchFirst(url)
     loadHistory(url)
 elif mode==2:
     Search(url)

@@ -6,10 +6,10 @@ import xbmcaddon,xbmcplugin,xbmcgui
 import urlresolver
 # from net import Net
 # from t0mm0.common.net import Net
-# import SimpleDownloader as downloader
+import SimpleDownloader as downloader
 
 
-# downloader = downloader.SimpleDownloader()
+downloader = downloader.SimpleDownloader()
 
 root_link = 'http://www.superphim.com'
 mob_root = 'http://www.phimmobile.com'
@@ -22,7 +22,7 @@ logo = xbmc.translatePath(os.path.join(home, 'icon.png'))
 # downloadpath = xbmc.translatePath(os.path.join(home,'/download'))
 
 def Home():
-    addDir('Search',searchlink,5,logo,False)
+    addDir('[COLOR FF67cc33]Search[/COLOR]',searchlink,5,logo,False)
     addDir('Phim Moi Nhat','http://www.superphim.com/phim-moi-update.html',1,logo,False)
     addDir('Phim HK & TQ','http://www.superphim.com/Phim-Hong-Kong-movies-72-page-1.html',1,logo,False)
     addDir('Phim Han Quoc','http://www.superphim.com/Phim-Han-Quoc-movies-107-page-1.html',1,logo,False)
@@ -33,7 +33,7 @@ def loadHistory(url):
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        addDir('Search',url,6,logo,False)
+        addDir('[COLOR FF67cc33]Search[/COLOR]',url,6,logo,False)
         if len(searches)!=0:
             for s in searches:
                 addDir(s,url+urllib.quote_plus(s),1,logo,True)
@@ -56,7 +56,7 @@ def editSearch():
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        keyb = xbmc.Keyboard(name, 'Enter search text')
+        keyb = xbmc.Keyboard(name, '[COLOR yellow]Enter search text[/COLOR]')
         keyb.doModal()
         if (keyb.isConfirmed()):
             newsearch = keyb.getText()
@@ -71,7 +71,7 @@ def editSearch():
 def getUserInput():
     try:
         searches = getStoredSearch()
-        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb = xbmc.Keyboard('', '[COLOR yellow]Enter search text[/COLOR]')
         keyb.doModal()
         if (keyb.isConfirmed()):
             searchText = urllib.quote_plus(keyb.getText())
@@ -187,31 +187,43 @@ def loadVideos(url,mirror):
         play(nUrl, mirrorName)
     except:pass
 
-def download(url):
-    nUrl, mirrorName = videoID(url)
-    if mirrorName == 'dailymotion':
-        hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(nUrl))
+def getHostedMediaFile(url,mirror):
+    if mirror == 'dailymotion':
+        hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(url))
         videoId=hostedmedia.resolve()
-            # videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
-    elif mirrorName == 'youtube':
-        hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(nUrl))
+        # videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
+    elif mirror == 'youtube':
+        hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(url))
         videoId = hostedmedia.resolve()
+    return videoId
+def makeDir():
+    try:
+        dialog = xbmcgui.Dialog()
+        if dialog.yesno('New Folder','Download to new folder?'):
+            keyb = xbmc.Keyboard('', 'Enter search text')
+            keyb.doModal()
+            if (keyb.isConfirmed()):
+                newfolder = urllib.quote_plus(keyb.getText())
+                mypath = xbmc.translatePath(os.path.join(downloadpath,newfolder))
+                if not os.path.isdir(mypath):
+                   os.makedirs(mypath)
+        else:
+            mypath=''
+        return mypath
+    except:pass
+
+def download():
+    nUrl, mirrorName = videoID(url)
+    videoId = getHostedMediaFile(nUrl,mirrorName)
+    mypath = makeDir()
+    if mypath!='':
+        downloadpath=mypath
     params = { "url": videoId, "download_path": downloadpath, "Title": name }
     downloader.download(str(name)+".mp4", params)
 
-
 def play(url,mirror):
     try:
-
-        if mirror == 'dailymotion':
-            hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(url))
-            videoId=hostedmedia.resolve()
-            # videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
-        elif mirror == 'youtube':
-            hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(url))
-            videoId = hostedmedia.resolve()
-            # videoId = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(url).replace('?','')
-
+        videoId = getHostedMediaFile(url,mirror)
         # if mysettings.getSetting('play')=='true':
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
@@ -285,21 +297,21 @@ def addDir(name,url,mode,iconimage,edit):
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     contextmenuitems = []
     if edit:
-        contextmenuitems.append(('Delete Search','XBMC.Container.Update(%s?url=%s&mode=8&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(name))))
-        contextmenuitems.append(('Edit Search','XBMC.Container.Update(%s?url=%s&mode=9&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(name))))
+        contextmenuitems.append(('[COLOR red]Delete[/COLOR] [COLOR blue]Search[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=8&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(name))))
+        contextmenuitems.append(('[COLOR yellow]Edit[/COLOR] [COLOR blue]Search[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=9&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(name))))
         liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
 def addLink(name,url,mode,mirror,iconimage):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&mirror="+urllib.quote_plus(mirror)+"&iconimage="+urllib.quote_plus(iconimage)
-    # contextmenuitems=[]
+    contextmenuitems=[]
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
-    # contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=8&mirror=%s&iconimage=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(mirror),urllib.quote_plus(iconimage))))
+    contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=10&mirror=%s&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(mirror),urllib.quote_plus(name))))
 
-    # liz.addContextMenuItems(contextmenuitems,replaceItems=False)
+    liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 
@@ -375,6 +387,8 @@ elif mode==8:
     deleteSearch()
 elif mode==9:
     editSearch()
+elif mode==10:
+    download()
 
 
 xbmcplugin.endOfDirectory(int(sysarg))
