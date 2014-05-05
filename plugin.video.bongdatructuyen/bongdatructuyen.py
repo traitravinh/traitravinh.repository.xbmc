@@ -21,7 +21,7 @@ def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
         if len(searches)==0:
-            searches="[('not a channel','')]"
+            searches="[('not a channel',' ')]"
         return searches
     except:pass
 
@@ -36,14 +36,15 @@ def getStoreChannels(url):
         for chname, chlink in channels:
             title = chname
             link = chlink
-            if link.find('sopcast')!=-1:
-                player = 'sopcasts'
-                colorize = '[COLOR FF00BFFF]Sopcast: [/COLOR]'
-            elif link.find('acestream')!=-1:
-                player = 'acestreams'
-                colorize = '[COLOR FFFF4500]AceStream: [/COLOR]'
+            if link!=' ':
+                if link.find('sopcast')!=-1:
+                    player = 'sopcasts'
+                    colorize = '[COLOR FF00BFFF]Sopcast: [/COLOR]'
+                elif link.find('acestream')!=-1:
+                    player = 'acestreams'
+                    colorize = '[COLOR FFFF4500]AceStream: [/COLOR]'
 
-            addLink(colorize+title,link,3,player,logo)
+                addLink(colorize+title,link,3,player,logo)
 
 
 def index_live(url):
