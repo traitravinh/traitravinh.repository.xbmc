@@ -43,7 +43,6 @@ def getStoreChannels(url):
                 elif link.find('acestream')!=-1:
                     player = 'acestreams'
                     colorize = '[COLOR FFFF4500]AceStream: [/COLOR]'
-
                 addLink(colorize+title,link,3,player,logo)
 
 
@@ -76,14 +75,10 @@ def channel_list(url):
             liimage = str(BeautifulSoup(str(i))('img')[0]['src'])
             if str(lilink).find('sopcast')!=-1:#or str(lilink).find('acestream')!=-1:
                 addLink('sopcasts - '+lititle,lilink,3,'sopcasts',liimage)
-                stitle = 'sopcasts - '+lititle
-                slink = lilink
-                update_channels(stitle,slink)
+                update_channels(lititle,lilink)
             elif str(lilink).find('acestream')!=-1:
                 addLink('acestreams - '+lititle,lilink,3,'acestreams',liimage)
-                stitle = 'acestreams - '+lititle
-                slink = lilink
-                update_channels(stitle,slink)
+                update_channels(lititle,lilink)
             elif str(lilink).find('sctv')!=-1:
                 addLink(lititle+ ' - sctv',homelink+str(lilink),3,'sctv',homelink+liimage)
 
@@ -93,21 +88,18 @@ def update_channels(title,link):
         if mysettings.getSetting('save_search')=='true':
             searches = getStoredSearch()
             searches = eval(searches)
-            idx = 0
+            # idx = 0
             if title!='':
-                for n,l in searches:
-                    chname_link = zip(title,link)
-                    if title.find('sopcasts'):
-                        n= 'sopcasts - '+n
-                    elif title.find('acestreams'):
-                        n='acestreams - '+n
-                    if title!=n:
-                        searches = chname_link(+searches)
-                    elif title==n and link!=l:
-                        searches[idx]=chname_link
-
+                for i in range(0,len(searches)):
+                    cname,llink = searches[i]
+                    chname_link = [(title,link)]
+                    if title!=cname:
+                        searches = chname_link+searches
+                        break
+                    elif title==cname and link!=llink:
+                        searches[i]=(title,link)
+                        break
                 saveStoredSearch(searches)
-
     except:pass
 
 def index_video(url):
