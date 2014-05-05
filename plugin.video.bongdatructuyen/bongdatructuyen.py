@@ -6,24 +6,45 @@ import xbmcaddon,xbmcplugin,xbmcgui
 
 homelink = 'http://www.bongdatructuyen.vn'
 playwire_base_url='http://cdn.playwire.com/'
-
 mysettings = xbmcaddon.Addon(id='plugin.video.bongdatructuyen')
 home = mysettings.getAddonInfo('path')
 logo = 'http://www.bongdatructuyen.vn/images/logos/114x114.png'
 
 def home():
     try:
-        # link = urllib2.urlopen(homelink).read()
-        # soup = BeautifulSoup(link.decode('utf-8'))
-        # menu = soup('ul',{'class':'menu'})
-        # li = BeautifulSoup(str(menu[0]))('li')
-        # for i in range(2,len(li)-3):
-        #     alink =homelink + str(BeautifulSoup(str(li[i]))('a')[0]['href'])
-        #     atitle = BeautifulSoup(str(li[i]))('a')[0].contents[0]
-        #     addDir(atitle.encode('utf-8'),alink,1,logo)
         addDir('live','http://www.bongdatructuyen.vn/truc-tiep',4,logo)
         addDir('video','http://www.bongdatructuyen.vn/video',1,logo)
+        addDir('Channels',homelink,6,logo)
     except:pass
+
+def getStoredSearch():
+    try:
+        searches = mysettings.getSetting('store_searches')
+        if len(searches)==0:
+            searches="[('not a channel','')]"
+        return searches
+    except:pass
+
+def saveStoredSearch(param):
+    try:
+        mysettings.setSetting('store_searches',repr(param))
+    except:pass
+
+def getStoreChannels(url):
+    if mysettings.getSetting('save_search')=='true':
+        channels =eval(getStoredSearch())
+        for chname, chlink in channels:
+            title = chname
+            link = chlink
+            if link.find('sopcast')!=-1:
+                player = 'sopcasts'
+                colorize = '[COLOR FF00BFFF]Sopcast: [/COLOR]'
+            elif link.find('acestream')!=-1:
+                player = 'acestreams'
+                colorize = '[COLOR FFFF4500]AceStream: [/COLOR]'
+
+            addLink(colorize+title,link,3,player,logo)
+
 
 def index_live(url):
     try:
@@ -38,7 +59,6 @@ def index_live(url):
                 licname = str(licname[0:3])
                 litime =BeautifulSoup(str(i))('div',{'class':'hour'})[0].contents[0]
                 lititle =licname+': '+BeautifulSoup(str(i))('h1')[0].contents[0].encode('utf-8') +' vs '+BeautifulSoup(str(i))('h1')[1].contents[0]+' - '+litime
-
                 addDir(lititle,lilink,5,logo)
     except:pass
 
@@ -55,10 +75,38 @@ def channel_list(url):
             liimage = str(BeautifulSoup(str(i))('img')[0]['src'])
             if str(lilink).find('sopcast')!=-1:#or str(lilink).find('acestream')!=-1:
                 addLink('sopcasts - '+lititle,lilink,3,'sopcasts',liimage)
+                stitle = 'sopcasts - '+lititle
+                slink = lilink
+                update_channels(stitle,slink)
             elif str(lilink).find('acestream')!=-1:
                 addLink('acestreams - '+lititle,lilink,3,'acestreams',liimage)
+                stitle = 'acestreams - '+lititle
+                slink = lilink
+                update_channels(stitle,slink)
             elif str(lilink).find('sctv')!=-1:
                 addLink(lititle+ ' - sctv',homelink+str(lilink),3,'sctv',homelink+liimage)
+
+    except:pass
+def update_channels(title,link):
+    try:
+        if mysettings.getSetting('save_search')=='true':
+            searches = getStoredSearch()
+            searches = eval(searches)
+            idx = 0
+            if title!='':
+                for n,l in searches:
+                    chname_link = zip(title,link)
+                    if title.find('sopcasts'):
+                        n= 'sopcasts - '+n
+                    elif title.find('acestreams'):
+                        n='acestreams - '+n
+                    if title!=n:
+                        searches = chname_link(+searches)
+                    elif title==n and link!=l:
+                        searches[idx]=chname_link
+
+                saveStoredSearch(searches)
+
     except:pass
 
 def index_video(url):
@@ -217,5 +265,13 @@ elif mode==4:
     index_live(url)
 elif mode==5:
     channel_list(url)
+elif mode==6:
+    getStoreChannels(url)
+# elif mode==6:
+#     Search(url)
+# elif mode==7:
+#     PlayVideo(url,server)
+# elif mode==8:
+#     test(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="General Settings">		
+		<setting id="save_search" type="bool" label="Save/Update Channels" default="true"/>
+		<setting id="store_searches" value="[('','')]"/>
+	</category>	
+</settings>
