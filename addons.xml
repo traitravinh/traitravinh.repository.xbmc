@@ -113,7 +113,7 @@
 
 <addon
   id="plugin.video.superphim"
-  version="1.0.1"
+  version="1.0.2"
   name="superphim"
   provider-name="traitravinh">
   <requires>

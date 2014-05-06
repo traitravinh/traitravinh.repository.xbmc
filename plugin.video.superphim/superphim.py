@@ -4,8 +4,6 @@ import urllib, urllib2, re, StringIO, os, sys, base64, gzip, string
 from bs4 import BeautifulSoup
 import xbmcaddon,xbmcplugin,xbmcgui
 import urlresolver
-# from net import Net
-# from t0mm0.common.net import Net
 import SimpleDownloader as downloader
 
 
@@ -121,7 +119,7 @@ def index(url):
             tSoup = BeautifulSoup(str(t))
             tLink = (tSoup('a')[0]['href']).lstrip('.')
             tTitle = tSoup('strong')[0].contents[0]
-            tImage = (tSoup('img')[0]['src']).replace(' ', '%20')
+            tImage = urllib.quote(tSoup('img')[0]['src'],safe="%/:=&?~#+!$,;'@()*[]")
             addDir(tTitle.encode('utf-8'),root_link+tLink,2,root_link + tImage,False)
         page_soup = soup.findAll('a',{'class':'pagelink'})
         for p in page_soup:
@@ -228,7 +226,8 @@ def play(url,mirror):
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
+        if xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem) is None:
+            xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
     except:pass
 
 def GetContent(url):
