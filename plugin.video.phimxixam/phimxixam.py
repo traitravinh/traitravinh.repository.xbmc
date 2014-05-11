@@ -42,7 +42,7 @@ def editSearch():
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        keyb = xbmc.Keyboard(name, '[COLOR yellow]Enter search text[/COLOR]')
+        keyb = xbmc.Keyboard(name, '[COLOR ffff8c00]Enter search text[/COLOR]')
         keyb.doModal()
         if (keyb.isConfirmed()):
             newsearch = keyb.getText()
