@@ -112,6 +112,24 @@
 </addon>
 
 <addon
+  id="plugin.video.phimxixam"
+  version="0.0.1"
+  name="[COLOR ffff8c00]X[/COLOR][COLOR ffffffff]i[/COLOR][COLOR ffff8c00]X[/COLOR][COLOR ffffffff]am[/COLOR]"
+  provider-name="traitravinh">
+  <requires>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="phimxixam.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Watch movies on phim.xixam.com</summary>
+    <description>Watch movies on phim.xixam.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon
   id="plugin.video.superphim"
   version="1.0.2"
   name="superphim"
