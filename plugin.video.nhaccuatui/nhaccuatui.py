@@ -21,10 +21,10 @@ def Home():
 
 def loadHistory(url):
     try:
-        searches = getStoredSearch()
-        searches = eval(searches)
         addDir('[COLOR FF00BFFF]Search[/COLOR]',url,2,logo,'',False,None)
+        searches = getStoredSearch()
         if len(searches)!=0:
+            searches = eval(searches)
             for i in range(0,len(searches)):
                 addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,'',True,i)
     except:pass
@@ -61,8 +61,12 @@ def getUserInput():
             searchText = urllib.quote_plus(keyb.getText())
             url = searchlink+searchText
         if searchText!='':
-            searches = eval(searches)
-            searches = [urllib.unquote_plus(searchText)] + searches
+            if len(searches)==0:
+                searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                searches = eval(searches)
+            else:
+                searches = eval(searches)
+                searches = [urllib.unquote_plus(searchText)] + searches
             saveStoredSearch(searches)
         return url
     except:pass
@@ -85,8 +89,8 @@ def Search(url):
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
-        if len(searches)==0:
-            searches="['hello']"
+        # if len(searches)==0:
+        #     searches="['hello']"
         return searches
     except:pass
 

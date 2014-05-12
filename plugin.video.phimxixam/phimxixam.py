@@ -7,9 +7,12 @@ import SimpleDownloader as downloader
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
-# headers = { 'User-Agent' : 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'}
 mysettings = xbmcaddon.Addon(id='plugin.video.phimxixam')
-# downloadpath = mysettings.getSetting('download_path')
+home_path = mysettings.getAddonInfo('path')
+addonname = addon.getAddonInfo('name')
+icon = addon.getAddonInfo('icon')
+message = "Please wait! Loading.."
+time=3000
 searchlink = 'http://phim.xixam.com/tim-kiem/?tk='
 homelink = 'http://phim.xixam.com'
 mhomelink='http://phim.xixam.com/m'
@@ -22,10 +25,12 @@ def loadHistory(url):
         addDir('[COLOR ffff8c00]Search[/COLOR]',url,6,logo,False,None)
         if mysettings.getSetting('save_search')=='true':
             searches = getStoredSearch()
-            searches = eval(searches)
             if len(searches)!=0:
-                for i in range(0,len(searches)):
-                    addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,True,i)
+                searches = eval(searches)
+                idn = 0
+                for s in searches:
+                    addDir(s,url+urllib.quote_plus(s),2,logo,True,idn)
+                    idn+=1
     except:pass
 
 def deleteSearch():
@@ -62,9 +67,13 @@ def getUserInput():
             url = searchlink+ searchText
         if mysettings.getSetting('save_search')=='true':
             if searchText!='':
-                searches = eval(searches)
-                searches = [urllib.unquote_plus(searchText)] + searches
-                saveStoredSearch(searches)
+                if len(searches)==0:
+                    searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                    searches = eval(searches)
+                else:
+                    searches = eval(searches)
+                    searches = [urllib.unquote_plus(searchText)] + searches
+            saveStoredSearch(searches)
         return url
     except:pass
 
@@ -86,8 +95,6 @@ def Search(url):
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
-        if len(searches)==0:
-            searches="['hello']"
         return searches
     except:pass
 
@@ -169,6 +176,7 @@ def videoLink(url):
 
 def play(url):
     try:
+        xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(addonname,message, time, iconimage))
         videoId = videoLink(url)
         if videoId.find('youtube')!=-1:
             hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(re.compile('http://www.youtube.com/embed/(.+?)\?').findall(videoId)[0]))

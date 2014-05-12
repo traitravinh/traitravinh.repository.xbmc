@@ -9,8 +9,8 @@ addonID = addon.getAddonInfo('id')
 addonname = addon.getAddonInfo('name')
 mysettings = xbmcaddon.Addon(id='plugin.video.phimvang')
 icon = addon.getAddonInfo('icon')
-message = "Please wait! Loading.."
-time=3000
+message = "Loading. Please Wait!..."
+time=6000
 root_link = 'http://m.phimvang.com'
 logo ='http://phimvang.com/sites/all/themes/news/logo.png'
 searchlink = 'http://m.phimvang.com/tim-kiem?key='
@@ -135,10 +135,12 @@ def loadHistory(url):
         addDir('[COLOR ffffd700]Search[/COLOR]',url,6,logo,False,None)
         if mysettings.getSetting('save_search')=='true':
             searches = getStoredSearch()
-            searches = eval(searches)
             if len(searches)!=0:
-                for i in range(0,len(searches)):
-                    addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),1,logo,True,i)
+                searches = eval(searches)
+                idn = 0
+                for s in searches:
+                    addDir(s,url+urllib.quote_plus(s),2,logo,True,idn)
+                    idn+=1
     except:pass
 
 def deleteSearch():
@@ -175,8 +177,12 @@ def getUserInput():
             url = searchlink+ searchText
         if mysettings.getSetting('save_search')=='true':
             if searchText!='':
-                searches = eval(searches)
-                searches = [urllib.unquote_plus(searchText)] + searches
+                if len(searches)==0:
+                    searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                    searches = eval(searches)
+                else:
+                    searches = eval(searches)
+                    searches = [urllib.unquote_plus(searchText)] + searches
                 saveStoredSearch(searches)
         return url
     except:pass
@@ -199,8 +205,6 @@ def Search(url):
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
-        if len(searches)==0:
-            searches="['hello']"
         return searches
     except:pass
 

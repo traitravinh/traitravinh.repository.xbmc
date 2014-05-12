@@ -29,10 +29,10 @@ def Home():
 
 def loadHistory(url):
     try:
-        searches = getStoredSearch()
-        searches = eval(searches)
         addDir('[COLOR FF67cc33]Search[/COLOR]',url,6,logo,False)
+        searches = getStoredSearch()
         if len(searches)!=0:
+            searches = eval(searches)
             for s in searches:
                 addDir(s,url+urllib.quote_plus(s),1,logo,True)
     except:pass
@@ -75,8 +75,12 @@ def getUserInput():
             searchText = urllib.quote_plus(keyb.getText())
             url = searchlink+ searchText
         if searchText!='':
-            searches = eval(searches)
-            searches = [urllib.unquote_plus(searchText)] + searches
+            if len(searches)==0:
+                searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                searches = eval(searches)
+            else:
+                searches = eval(searches)
+                searches = [urllib.unquote_plus(searchText)] + searches
             saveStoredSearch(searches)
         return url
     except:pass
@@ -99,8 +103,6 @@ def Search(url):
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
-        if len(searches)==0:
-            searches="['hello']"
         return searches
     except:pass
 
@@ -222,11 +224,10 @@ def download():
 def play(url,mirror):
     try:
         videoId = getHostedMediaFile(url,mirror)
-        # if mysettings.getSetting('play')=='true':
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
-        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        if xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem) is None:
+        x=xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+        if x is None:
             xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
     except:pass
 
