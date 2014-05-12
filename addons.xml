@@ -112,6 +112,24 @@
 </addon>
 
 <addon
+  id="plugin.video.phimvang"
+  version="1.0.0"
+  name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
+  provider-name="traitravinh">
+  <requires>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="phimvang.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Watch Movies</summary>
+    <description>Watch Movies on phimvang.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon
   id="plugin.video.phimxixam"
   version="0.0.1"
   name="[COLOR ffff8c00]X[/COLOR][COLOR ffffffff]i[/COLOR][COLOR ffff8c00]X[/COLOR][COLOR ffffffff]am[/COLOR]"
