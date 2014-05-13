@@ -227,7 +227,6 @@ def download(url):
 
 def delete(url):
     try:
-        print url
         dialog = xbmcgui.Dialog()
         if dialog.yesno('Delete','Delete File?'):
             os.remove(url)

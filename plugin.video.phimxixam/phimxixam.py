@@ -32,7 +32,6 @@ def loadHistory(url):
                     addDir(s,url+urllib.quote_plus(s),2,logo,True,idn)
                     idn+=1
                 # for i in range(0,len(searches)):
-                #     print searches[i]
                 #     addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,True,i)
     except:pass
 
@@ -122,7 +121,6 @@ def home():
 
 def index(url):
     try:
-        print url
         link = urllib2.urlopen(url).read()
         soup = BeautifulSoup(link.decode('utf-8'))
         div_BlockProduct2 = soup('div',{'class':'BlockProduct2'})
