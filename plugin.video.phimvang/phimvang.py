@@ -10,7 +10,7 @@ addonname = addon.getAddonInfo('name')
 mysettings = xbmcaddon.Addon(id='plugin.video.phimvang')
 icon = addon.getAddonInfo('icon')
 message = "Loading. Please Wait!..."
-time=6000
+time=4000
 root_link = 'http://m.phimvang.com'
 logo ='http://phimvang.com/sites/all/themes/news/logo.png'
 searchlink = 'http://m.phimvang.com/tim-kiem?key='
@@ -31,6 +31,7 @@ def Home():
         atitle = BeautifulSoup(str(a))('a')[0].contents[0]
         alink = BeautifulSoup(str(a))('a')[0]['href']
         addDir(atitle.encode('utf-8'),root_link+alink,1,logo,False,None)
+
 
 def index(url):
     try:
@@ -89,8 +90,6 @@ def play(VideoUrl,mirror):
         VideoUrl = hostedmedia.resolve()
     listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
-    xbmcPlayer = xbmc.Player()
-    xbmcPlayer.play(VideoUrl,listitem)
 
 def episodes(url):
     try:
@@ -231,6 +230,7 @@ def addLink(name,url,mode,mirror,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
+    liz.setProperty("IsPlayable","true")
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 

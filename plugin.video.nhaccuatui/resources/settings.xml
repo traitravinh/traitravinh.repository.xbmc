@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 	<category label="General Settings">		
-		<setting id="download_path" type="folder" label="Download Path" default="" />		
+		<setting id="download_path" type="folder" label="Download Path" default="" />
+		<setting id="save_search" value="true" />		
 		<setting id="store_searches" value="[]"/>
 	</category>	
 </settings>

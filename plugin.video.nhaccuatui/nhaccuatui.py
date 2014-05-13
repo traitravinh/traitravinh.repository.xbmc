@@ -12,7 +12,7 @@ downloadpath = mysettings.getSetting('download_path')
 searchlink ='http://www.nhaccuatui.com/tim-kiem?q='
 home_link = 'http://www.nhaccuatui.com/'
 logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
-pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+# pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
 def Home():
     addDir('[COLOR FF00BFFF]Search[/COLOR]',searchlink,1,logo,'',False,None)
@@ -258,13 +258,14 @@ def addLink(name,url,mode,iconimage,cname):
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
         liz.setInfo( type="Video", infoLabels={ "Title": name})
         liz.setProperty('mimetype', 'video/x-msvideo')
+        liz.setProperty("IsPlayable","true")
         contextmenuitems = []
         if url.find('http://')!=-1:
             contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
         else:
             contextmenuitems.append(('[COLOR red]Delete[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
         liz.addContextMenuItems(contextmenuitems,replaceItems=False)
-        pl.add(u,liz)
+        # pl.add(u,liz)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
         return ok
 

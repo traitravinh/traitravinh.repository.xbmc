@@ -113,7 +113,7 @@
 
 <addon
   id="plugin.video.phimvang"
-  version="1.0.0"
+  version="1.0.1"
   name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -131,7 +131,7 @@
 
 <addon
   id="plugin.video.phimxixam"
-  version="0.0.1"
+  version="0.0.2"
   name="[COLOR ffff8c00]X[/COLOR][COLOR ffffffff]i[/COLOR][COLOR ffff8c00]X[/COLOR][COLOR ffffffff]am[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -149,7 +149,7 @@
 
 <addon
   id="plugin.video.superphim"
-  version="1.0.2"
+  version="1.0.3"
   name="superphim"
   provider-name="traitravinh">
   <requires>

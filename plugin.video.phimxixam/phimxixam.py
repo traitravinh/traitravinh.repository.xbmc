@@ -31,6 +31,9 @@ def loadHistory(url):
                 for s in searches:
                     addDir(s,url+urllib.quote_plus(s),2,logo,True,idn)
                     idn+=1
+                # for i in range(0,len(searches)):
+                #     print searches[i]
+                #     addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,True,i)
     except:pass
 
 def deleteSearch():
@@ -119,6 +122,7 @@ def home():
 
 def index(url):
     try:
+        print url
         link = urllib2.urlopen(url).read()
         soup = BeautifulSoup(link.decode('utf-8'))
         div_BlockProduct2 = soup('div',{'class':'BlockProduct2'})
@@ -184,7 +188,8 @@ def play(url):
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
+        # xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
+
     except:pass
 
 def addDir(name,url,mode,iconimage,edit,inum):
@@ -205,6 +210,7 @@ def addLink(name,url,mode,mirror,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
+    liz.setProperty("IsPlayable","true")
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 

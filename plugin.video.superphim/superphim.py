@@ -226,9 +226,7 @@ def play(url,mirror):
         videoId = getHostedMediaFile(url,mirror)
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
-        x=xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        if x is None:
-            xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
     except:pass
 
 def GetContent(url):
@@ -309,6 +307,7 @@ def addLink(name,url,mode,mirror,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
+    liz.setProperty("IsPlayable","true")
     contextmenuitems.append(('Download','XBMC.Container.Update(%s?url=%s&mode=10&mirror=%s&name=%s)'%('plugin://plugin.video.superphim',urllib.quote_plus(url),urllib.quote_plus(mirror),urllib.quote_plus(name))))
 
     liz.addContextMenuItems(contextmenuitems,replaceItems=False)
