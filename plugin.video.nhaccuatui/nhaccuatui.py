@@ -5,7 +5,8 @@ import xbmcaddon,xbmcplugin,xbmcgui
 from bs4 import BeautifulSoup
 import SimpleDownloader as downloader
 
-
+addon = xbmcaddon.Addon()
+addonID = addon.getAddonInfo('id')
 downloader = downloader.SimpleDownloader()
 mysettings = xbmcaddon.Addon(id='plugin.video.nhaccuatui')
 downloadpath = mysettings.getSetting('download_path')
@@ -13,20 +14,23 @@ searchlink ='http://www.nhaccuatui.com/tim-kiem?q='
 home_link = 'http://www.nhaccuatui.com/'
 logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
 # pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
+    addon.openSettings()
 
 def Home():
     addDir('[COLOR FF00BFFF]Search[/COLOR]',searchlink,1,logo,'',False,None)
     addDir('Downloaded [COLOR blue]Audios[/COLOR]',downloadpath,8,logo,'',False,None)
-    addDir('Downloaded [COLOR pink]Videos[/COLOR]',downloadpath,8,logo,'',False,None)
+    addDir('Downloaded [COLOR ffff69b4]Videos[/COLOR]',downloadpath,8,logo,'',False,None)
 
 def loadHistory(url):
     try:
         addDir('[COLOR FF00BFFF]Search[/COLOR]',url,2,logo,'',False,None)
-        searches = getStoredSearch()
-        if len(searches)!=0:
-            searches = eval(searches)
-            for i in range(0,len(searches)):
-                addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,'',True,i)
+        if mysettings.getSetting('save_search')=='true':
+            searches = getStoredSearch()
+            if len(searches)!=0:
+                searches = eval(searches)
+                for i in range(0,len(searches)):
+                    addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,'',True,i)
     except:pass
 
 def deleteSearch():
@@ -42,7 +46,7 @@ def editSearch():
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        keyb = xbmc.Keyboard(name, 'Enter search text')
+        keyb = xbmc.Keyboard(name, '[COLOR FF00BFFF]Enter search text[/COLOR]')
         keyb.doModal()
         if (keyb.isConfirmed()):
             newsearch = keyb.getText()
@@ -55,18 +59,19 @@ def editSearch():
 def getUserInput():
     try:
         searches = getStoredSearch()
-        keyb = xbmc.Keyboard('', 'Enter search text')
+        keyb = xbmc.Keyboard('', '[COLOR FF00BFFF]Enter search text[/COLOR]')
         keyb.doModal()
         if (keyb.isConfirmed()):
             searchText = urllib.quote_plus(keyb.getText())
             url = searchlink+searchText
-        if searchText!='':
-            if len(searches)==0:
-                searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
-                searches = eval(searches)
-            else:
-                searches = eval(searches)
-                searches = [urllib.unquote_plus(searchText)] + searches
+        if mysettings.getSetting('save_search')=='true':
+            if searchText!='':
+                if len(searches)==0:
+                    searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                    searches = eval(searches)
+                else:
+                    searches = eval(searches)
+                    searches = [urllib.unquote_plus(searchText)] + searches
             saveStoredSearch(searches)
         return url
     except:pass
