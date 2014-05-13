@@ -139,7 +139,7 @@ def loadHistory(url):
                 searches = eval(searches)
                 idn = 0
                 for s in searches:
-                    addDir(s,url+urllib.quote_plus(s),2,logo,True,idn)
+                    addDir(s,url+urllib.quote_plus(s),1,logo,True,idn)
                     idn+=1
     except:pass
 
