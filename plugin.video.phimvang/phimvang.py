@@ -2,7 +2,7 @@ __author__ = 'traitravinh'
 import urllib, urllib2, re, os, sys
 import xbmcaddon,xbmcplugin,xbmcgui
 from bs4 import BeautifulSoup
-import urlresolver
+# import urlresolver
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
@@ -81,13 +81,13 @@ def mirror_link(url):
 
 def play(VideoUrl,mirror):
     if mirror == 'dailymotion':
-        # VideoUrl = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(VideoUrl).replace('?','')
-        hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(VideoUrl))
-        VideoUrl = hostedmedia.resolve()
+        VideoUrl = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(VideoUrl).replace('?','')
+        # hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(VideoUrl))
+        # VideoUrl = hostedmedia.resolve()
     elif mirror == 'youtube':
-        # VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
-        hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(VideoUrl))
-        VideoUrl = hostedmedia.resolve()
+        VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
+        # hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(VideoUrl))
+        # VideoUrl = hostedmedia.resolve()
     listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
 
@@ -163,6 +163,7 @@ def editSearch():
             searches[inum]=newsearch
         saveStoredSearch(searches)
         newsearch=urllib.quote_plus(newsearch)
+        xbmc.executebuiltin("XBMC.Container.Refresh")
         Search(searchlink+newsearch)
     except:pass
 
@@ -198,6 +199,7 @@ def Search(url):
                     url = getUserInput()
             else:
                 url = getUserInput()
+        xbmc.executebuiltin("XBMC.Container.Refresh")
         index(url)
     except: pass
 
