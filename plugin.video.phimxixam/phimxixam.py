@@ -17,6 +17,7 @@ searchlink = 'http://phim.xixam.com/tim-kiem/?tk='
 homelink = 'http://phim.xixam.com'
 mhomelink='http://phim.xixam.com/m'
 logo ='http://phim.xixam.com/images/logo.png'
+
 while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
     addon.openSettings()
 
@@ -31,19 +32,16 @@ def loadHistory(url):
                 for s in searches:
                     addDir(s,url+urllib.quote_plus(s),2,logo,True,idn)
                     idn+=1
-                # for i in range(0,len(searches)):
-                #     addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,True,i)
     except:pass
 
 def deleteSearch():
     try:
         searches = getStoredSearch()
         searches = eval(searches)
-        del(searches[inum])
+        searches.pop(inum)
         saveStoredSearch(searches)
-        # xbmc.executebuiltin('Container.Refresh')
-    except StopIteration:
-        pass
+        # xbmc.executebuiltin("XBMC.Container.Refresh")
+    except:pass
 
 def editSearch():
     try:
@@ -56,6 +54,7 @@ def editSearch():
             searches[inum]=newsearch
         saveStoredSearch(searches)
         newsearch=urllib.quote_plus(newsearch)
+        xbmc.executebuiltin("XBMC.Container.Refresh")
         Search(searchlink+newsearch)
     except:pass
 
@@ -67,15 +66,15 @@ def getUserInput():
         if (keyb.isConfirmed()):
             searchText = urllib.quote_plus(keyb.getText())
             url = searchlink+ searchText
-        if mysettings.getSetting('save_search')=='true':
-            if searchText!='':
-                if len(searches)==0:
-                    searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
-                    searches = eval(searches)
-                else:
-                    searches = eval(searches)
-                    searches = [urllib.unquote_plus(searchText)] + searches
-            saveStoredSearch(searches)
+            if mysettings.getSetting('save_search')=='true':
+                if searchText!='':
+                    if len(searches)==0:
+                        searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                        searches = eval(searches)
+                    else:
+                        searches = eval(searches)
+                        searches = [urllib.unquote_plus(searchText)] + searches
+                    saveStoredSearch(searches)
         return url
     except:pass
 
@@ -91,6 +90,7 @@ def Search(url):
                     url = getUserInput()
             else:
                 url = getUserInput()
+        xbmc.executebuiltin("XBMC.Container.Refresh")
         index(url)
     except: pass
 
@@ -103,6 +103,7 @@ def getStoredSearch():
 def saveStoredSearch(param):
     try:
         mysettings.setSetting('store_searches',repr(param))
+        # xbmc.executebuiltin("XBMC.Container.Refresh")
     except:pass
 
 def home():
@@ -192,7 +193,7 @@ def play(url):
 
 def addDir(name,url,mode,iconimage,edit,inum):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)
-    ok=True
+    # ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     contextmenuitems = []

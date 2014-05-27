@@ -175,15 +175,15 @@ def getUserInput():
         if (keyb.isConfirmed()):
             searchText = urllib.quote_plus(keyb.getText())
             url = searchlink+ searchText
-        if mysettings.getSetting('save_search')=='true':
-            if searchText!='':
-                if len(searches)==0:
-                    searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
-                    searches = eval(searches)
-                else:
-                    searches = eval(searches)
-                    searches = [urllib.unquote_plus(searchText)] + searches
-                saveStoredSearch(searches)
+            if mysettings.getSetting('save_search')=='true':
+                if searchText!='':
+                    if len(searches)==0:
+                        searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                        searches = eval(searches)
+                    else:
+                        searches = eval(searches)
+                        searches = [urllib.unquote_plus(searchText)] + searches
+                    saveStoredSearch(searches)
         return url
     except:pass
 

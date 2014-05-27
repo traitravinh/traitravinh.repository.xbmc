@@ -29,17 +29,19 @@ def loadHistory(url):
             searches = getStoredSearch()
             if len(searches)!=0:
                 searches = eval(searches)
-                for i in range(0,len(searches)):
-                    addDir(searches[i],xbmc.translatePath(os.path.join(url,urllib.quote_plus(searches[i]))),2,logo,'',True,i)
+                idn = 0
+                for s in searches:
+                    addDir(s,url+urllib.quote_plus(s),2,logo,'',True,idn)
+                    idn+=1
     except:pass
 
 def deleteSearch():
     try:
+        print str(inum)
         searches = getStoredSearch()
         searches = eval(searches)
         del(searches[inum])
         saveStoredSearch(searches)
-        # xbmc.executebuiltin('Container.Refresh')
     except:pass
 
 def editSearch():
@@ -64,15 +66,16 @@ def getUserInput():
         if (keyb.isConfirmed()):
             searchText = urllib.quote_plus(keyb.getText())
             url = searchlink+searchText
-        if mysettings.getSetting('save_search')=='true':
-            if searchText!='':
-                if len(searches)==0:
-                    searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
-                    searches = eval(searches)
-                else:
-                    searches = eval(searches)
-                    searches = [urllib.unquote_plus(searchText)] + searches
-            saveStoredSearch(searches)
+            if mysettings.getSetting('save_search')=='true':
+                if searchText!='':
+                    if len(searches)==0:
+                        searches = ''.join(["['",urllib.unquote_plus(searchText),"']"])
+                        searches = eval(searches)
+                    else:
+                        searches = eval(searches)
+                        searches = [urllib.unquote_plus(searchText)] + searches
+
+                    saveStoredSearch(searches)
         return url
     except:pass
 
@@ -258,20 +261,20 @@ def addDir(name,url,mode,iconimage,cname,edit,inum):
     return ok
 
 def addLink(name,url,mode,iconimage,cname):
-        u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
-        liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
-        liz.setInfo( type="Video", infoLabels={ "Title": name})
-        liz.setProperty('mimetype', 'video/x-msvideo')
-        liz.setProperty("IsPlayable","true")
-        contextmenuitems = []
-        if url.find('http://')!=-1:
-            contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
-        else:
-            contextmenuitems.append(('[COLOR red]Delete[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
-        liz.addContextMenuItems(contextmenuitems,replaceItems=False)
-        # pl.add(u,liz)
-        ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
-        return ok
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&cname="+urllib.quote_plus(cname)
+    liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
+    liz.setInfo( type="Video", infoLabels={ "Title": name})
+    liz.setProperty('mimetype', 'video/x-msvideo')
+    liz.setProperty("IsPlayable","true")
+    contextmenuitems = []
+    if url.find('http://')!=-1:
+        contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=7)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+    else:
+        contextmenuitems.append(('[COLOR red]Delete[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
+    liz.addContextMenuItems(contextmenuitems,replaceItems=False)
+    # pl.add(u,liz)
+    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
+    return ok
 
 def get_params():
         param=[]
