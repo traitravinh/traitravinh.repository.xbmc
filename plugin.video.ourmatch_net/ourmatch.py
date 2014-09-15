@@ -1,5 +1,6 @@
 import urllib, urllib2, re, os, sys
 from bs4 import BeautifulSoup
+# import BeautifulSoup
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 
@@ -9,13 +10,26 @@ mysettings = xbmcaddon.Addon(id='plugin.video.ourmatch_net')
 home = mysettings.getAddonInfo('path')
 logo = 'http://www.ourmatch.net/wp-content/themes/OurMatchV2/images/logo.png'
 
+def GetContent(url):
+    req = urllib2.Request(url)
+    req.add_unredirected_header('User-agent','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+    response = urllib2.urlopen(req).read()
+    return response
 
 def home():
     try:
-        link = urllib2.urlopen(homelink).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        main_nav = soup('div',{'id':'main-nav'})
-        li = BeautifulSoup(str(main_nav[0]))('li')
+        link = GetContent(homelink)
+        newlink = ''.join(link.splitlines()).replace('\t','')
+        match = re.compile('<div class="division">(.+?)<div id="ad-right">').findall(newlink)
+
+        # soup = BeautifulSoup(str(link.replace(' ','').replace('\t','').replace('\n','')))
+        # main_nav = soup('div',{'id':'allleagues'})
+        # li = BeautifulSoup(str(main_nav[0]))('li',{'class':'hover-tg'})
+        # li = soup('li',{'class':'hover-tg'})
+
+        addDir('Latest Highlights',homelink,1,logo)
+
+        li = BeautifulSoup(str(match[0].replace('\t','')))('li',{'class':'hover-tg'})
         for l in li:
             lilink = BeautifulSoup(str(l))('a')[0]['href']
             lititle = BeautifulSoup(str(l))('a')[0].contents[0]
@@ -25,14 +39,20 @@ def home():
 def index(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        thumb = soup('div',{'class':'thumb'})
+        newlink = ''.join(link.splitlines()).replace('\t','')
+        # soup = BeautifulSoup(link.decode('utf-8'))
+        # thumb = soup('div',{'class':'thumb'})
+        match = re.compile('<div class="thumb">(.+?)<footer id="footer">').findall(newlink)
+        thumb = BeautifulSoup(match[0].decode('utf-8'))('div',{'class':'thumb'})
         for t in thumb:
             tlink = BeautifulSoup(str(t))('a')[0]['href']
             ttitle = BeautifulSoup(str(t))('a')[0]['title']
             timage = BeautifulSoup(str(t))('img')[0]['src']
             addDir(ttitle,tlink,2,timage)
-        wp_pagenavi = soup('div',{'class':'wp-pagenavi'})
+
+        match_pages = re.compile('<div class="loop-nav pag-nav">(.+?)<footer id="footer">').findall(newlink)
+        # wp_pagenavi = soup('div',{'class':'wp-pagenavi'})
+        wp_pagenavi = BeautifulSoup(str(match_pages[0]))('div',{'class':'wp-pagenavi'})
         page_larger = BeautifulSoup(str(wp_pagenavi[0]))('a')
         for p in page_larger:
             plink = BeautifulSoup(str(p))('a')[0]['href']
@@ -43,13 +63,19 @@ def index(url):
 def videoLink(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        entry_content = soup('div',{'class':'entry-content rich-content'})
-        p_tag = BeautifulSoup(str(entry_content[0]))('p')
+        newlink = ''.join(link.splitlines()).replace('\t','')
+        # soup = BeautifulSoup(link.decode('utf-8'))
+        # entry_content = soup('div',{'class':'entry-content rich-content'})
+        # p_tag = BeautifulSoup(str(entry_content[0]))('p')
+        match = re.compile('<div class="entry-content rich-content">(.+?)</div>').findall(newlink)
+
+        p_tag = BeautifulSoup(str(match[0]))('p')
+
         for p in p_tag:
             ptext = BeautifulSoup(str(p)).p.contents[0]
             ptext = ptext.encode('utf-8')
-            pscritp =retrievVideoLink(str(BeautifulSoup(str(p)).p.next.next.next.next))
+            plink = BeautifulSoup(str(p)).p.next.next.next
+            pscritp =retrievVideoLink(str(plink))
             addLink(ptext,pscritp,3,'',iconimage)
     except:pass
 
