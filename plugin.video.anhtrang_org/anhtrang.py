@@ -108,6 +108,12 @@ def GetContent(url):
     response = urllib2.urlopen(req).read()
     return response
 
+def GetContentMobile(url):
+    req = urllib2.Request(url)
+    req.add_unredirected_header('User-agent','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+    response = urllib2.urlopen(req).read()
+    return response
+
 def home():
     try:
         addDir('[COLOR ffff8c00]Search[/COLOR]',searchlink,1,logo,False,None)
@@ -127,7 +133,13 @@ def index(url):
         list_movies = soup('div',{'class':'poster'})
         for movie in list_movies:
             movie_img = BeautifulSoup(str(movie))('img')[0]['src']
-            movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('phim.','m.')
+            try:
+                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('phim.','m.')
+            except:pass
+            try:
+                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('http://phimtuoiteen.com','http://m.anhtrang.org')
+            except:pass
+
             movie_title = BeautifulSoup(str(movie))('a')[0]['title']
             addDir(movie_title.encode('utf-8'),movie_link,3,movie_img,False,None)
 
@@ -140,7 +152,7 @@ def index(url):
     except:pass
 def episodes(url):
     try:
-        link = GetContent(url)
+        link = GetContentMobile(url)
         soup = BeautifulSoup(link.decode('utf-8'))
         addLink('1',url,4,'',iconimage)
         episodes = soup('a',{'class':'ep'})
