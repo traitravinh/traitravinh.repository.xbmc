@@ -3,6 +3,7 @@ import urllib, urllib2, re, os, sys, StringIO
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 from bs4 import BeautifulSoup
+# import BeautifulSoup
 import SimpleDownloader as downloader
 
 addon = xbmcaddon.Addon()
@@ -111,15 +112,24 @@ def saveStoredSearch(param):
 def index_search(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        search_control_select = soup('ul',{'class':'search_control_select'})
-        li_soup = BeautifulSoup(str(search_control_select[0]))('a')
+        newlink = ''.join(link.splitlines()).replace('\t','')
+
+        #Because of bugs in Beautifulsoup(can't parse whole newlink) so needs to use regex to get part of document first to use beautifulsoup
+        match = re.compile('<ul class="search_control_select">(.+?)<a href="javascript:;" id="search_follow"').findall(newlink)
+        soup = BeautifulSoup(match[0].replace('\t',''))
+        # search_control_select = soup('ul',{'class':'search_control_select'})
+        # li_soup = BeautifulSoup(str(search_control_select[0]))('a')
+
+        li_soup = BeautifulSoup(str(match[0].replace('\t','')))('a')
+        print li_soup
         for i in range(1,4):
             a_soup = BeautifulSoup(str(li_soup[i]))
             alink = a_soup('a')[0]['href']
             atitle = a_soup('a')[0]['title'].encode('utf-8')
             acount=a_soup('span')[0].contents[0]
             title = atitle + str(acount)
+            print alink
+            print title +'\n'
             addDir(title,alink,4,logo,atitle,False,None)
     except:pass
 
@@ -128,18 +138,24 @@ def search_return(url,cname):
         image = logo
         key = ''
         subkey =''
+        link = urllib2.urlopen(url).read()
+        newlink = ''.join(link.splitlines()).replace('\t','')
+
         if cname.find('B')!=-1:
             key='list_song'
             subkey = 'name_song'
+            #Because of BSoup bug, we have to have this extra line
+            match = re.compile('<ul class="search_returns_list">(.+?)<div class="box_pageview">').findall(newlink)
         elif cname.find('P')!=-1:
             key = 'list_album'
             subkey = 'box_absolute'
+            match = re.compile('<ul class="search_returns_list">(.+?)<div class="box_pageview">').findall(newlink)
         elif cname.find('V')!=-1:
             key = 'list_video'
             subkey = 'img'
+            match = re.compile('<ul class="search_returns_list">(.+?)<div class="box_pageview">').findall(newlink)
 
-        link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        soup = BeautifulSoup(match[0].replace('\t','').decode('utf-8'))
         lists = soup('li',{'class':key})
         for l in lists:
             asoup = BeautifulSoup(str(l))
@@ -151,13 +167,23 @@ def search_return(url,cname):
             atitle = asoup('a',{'class':subkey})[0]['title'].encode('utf-8')
             addDir(atitle,alink,5,image,cname,False,None)
 
-        box_pageview = soup('div',{'class':'box_pageview'})
-        pages = BeautifulSoup(str(box_pageview[0])).findAll('a')
+        # box_pageview = soup('div',{'class':'box_pageview'})#BSoup not work, switch to regex
+        match_page = re.compile('<div class="box_pageview">(.+?)</div>').findall(newlink)
+
+        pages = BeautifulSoup(str(match_page[0].replace('\t',''))).findAll('a')
         for p in pages:
             psoup = BeautifulSoup(str(p))
-            plink = psoup('a')[0]['href']
-            ptitle = psoup('a')[0].contents[0]
-            addDir(ptitle.encode('utf-8'),plink,4,logo,cname,False,None)
+            try:
+                pactive=str(psoup('a',{'class':'active'})[0])
+            except:
+                plink = psoup('a')[0]['href']
+                ptitle = psoup('a')[0].contents[0]
+                # print ptitle.decode('utf-8')
+                if ptitle=='&larr;':
+                    ptitle='Previous'
+                elif ptitle =='&rarr;':
+                    ptitle='next'
+                addDir(ptitle.encode('utf-8'),plink,4,logo,cname,False,None)
     except:pass
 
 def explore(url):
@@ -177,9 +203,15 @@ def explore(url):
 def getXML(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
-        flash_playing = soup('div',{'class':'box_playing'})
-        file = re.compile('file=(.+?)" /').findall(str(flash_playing[0]))[0]
+        newlink = ''.join(link.splitlines()).replace('\t','')
+
+        #since BSoup not working, switch to full regex
+        # soup = BeautifulSoup(link.decode('utf-8'))
+        # flash_playing = soup('div',{'class':'box_playing'})
+        # file = re.compile('file=(.+?)" /').findall(str(flash_playing[0]))[0]
+        ##################
+
+        file = re.compile('file=(.+?)" /').findall(str(newlink))[0]
         return file
     except:pass
 
