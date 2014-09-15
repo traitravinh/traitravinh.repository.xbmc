@@ -2,7 +2,7 @@
 <addons>
 <addon
   id="plugin.video.anhtrang_org"
-  version="0.0.2"
+  version="0.0.3"
   name="[COLOR ffffff00]Anh[/COLOR][COLOR ffffa500]Trang[/COLOR][COLOR ffffffff].ORG[/COLOR]"
   provider-name="traitravinh">
   <requires>

@@ -76,8 +76,6 @@ def getUserInput():
     except:pass
 
 def Search(url):
-    print 'HERE URL'
-    print url
     try:
         if url.find('.html')!=-1:
             url = url.rstrip()
@@ -134,11 +132,9 @@ def index(url):
         for movie in list_movies:
             movie_img = BeautifulSoup(str(movie))('img')[0]['src']
             try:
-                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('phim.','m.')
-            except:pass
-            try:
-                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('http://phimtuoiteen.com','http://m.anhtrang.org')
-            except:pass
+                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('http://phim.','http://m.')
+            except:
+                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('http://www.phimtuoiteen.com','http://m.anhtrang.org')
 
             movie_title = BeautifulSoup(str(movie))('a')[0]['title']
             addDir(movie_title.encode('utf-8'),movie_link,3,movie_img,False,None)
