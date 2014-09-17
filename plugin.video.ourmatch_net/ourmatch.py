@@ -27,7 +27,7 @@ def home():
         # li = BeautifulSoup(str(main_nav[0]))('li',{'class':'hover-tg'})
         # li = soup('li',{'class':'hover-tg'})
 
-        addDir('Latest Highlights',homelink,1,logo)
+        addDir('Latest Games',homelink,1,logo)
 
         li = BeautifulSoup(str(match[0].replace('\t','')))('li',{'class':'hover-tg'})
         for l in li:
@@ -67,7 +67,7 @@ def videoLink(url):
         # soup = BeautifulSoup(link.decode('utf-8'))
         # entry_content = soup('div',{'class':'entry-content rich-content'})
         # p_tag = BeautifulSoup(str(entry_content[0]))('p')
-        match = re.compile('<div class="entry-content rich-content">(.+?)</div>').findall(newlink)
+        match = re.compile('<div id="main-content">(.+?)<iframe src=').findall(newlink)
 
         p_tag = BeautifulSoup(str(match[0]))('p')
 
