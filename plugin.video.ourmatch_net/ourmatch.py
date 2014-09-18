@@ -42,7 +42,7 @@ def index(url):
         newlink = ''.join(link.splitlines()).replace('\t','')
         # soup = BeautifulSoup(link.decode('utf-8'))
         # thumb = soup('div',{'class':'thumb'})
-        match = re.compile('<div class="thumb">(.+?)<footer id="footer">').findall(newlink)
+        match = re.compile('<div id="main-content">(.+?)<footer id="footer">').findall(newlink)
         thumb = BeautifulSoup(match[0].decode('utf-8'))('div',{'class':'thumb'})
         for t in thumb:
             tlink = BeautifulSoup(str(t))('a')[0]['href']
