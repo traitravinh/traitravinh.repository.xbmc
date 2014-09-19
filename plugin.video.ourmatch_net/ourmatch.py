@@ -41,7 +41,7 @@ def index(url):
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
         # soup = BeautifulSoup(link.decode('utf-8'))
-        # thumb = soup('div',{'class':'thumb'})
+        # thumb = soup('div',{'class':'thumb'})#######
         match = re.compile('<div id="main-content">(.+?)<footer id="footer">').findall(newlink)
         thumb = BeautifulSoup(match[0].decode('utf-8'))('div',{'class':'thumb'})
         for t in thumb:
