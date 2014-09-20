@@ -38,7 +38,7 @@ def loadHistory(url):
 
 def deleteSearch():
     try:
-        print str(inum)
+        # print str(inum)
         searches = getStoredSearch()
         searches = eval(searches)
         del(searches[inum])
@@ -119,9 +119,8 @@ def index_search(url):
         soup = BeautifulSoup(match[0].replace('\t',''))
         # search_control_select = soup('ul',{'class':'search_control_select'})
         # li_soup = BeautifulSoup(str(search_control_select[0]))('a')
-
         li_soup = BeautifulSoup(str(match[0].replace('\t','')))('a')
-        print li_soup
+
         for i in range(1,4):
             a_soup = BeautifulSoup(str(li_soup[i]))
             alink = a_soup('a')[0]['href']

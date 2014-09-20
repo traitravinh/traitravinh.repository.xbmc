@@ -131,21 +131,18 @@ def index(url):
         list_movies = soup('div',{'class':'poster'})
         for movie in list_movies:
             movie_img = BeautifulSoup(str(movie))('img')[0]['src']
-            try:
-                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('http://phim.','http://m.')
-            except:
-                movie_link = BeautifulSoup(str(movie))('a')[0]['href'].replace('http://www.phimtuoiteen.com','http://m.anhtrang.org')
-
+            movie_link = BeautifulSoup(str(movie))('a')[0]['href']
+            matchObj = re.match('http?:\/\/(w+)?\.?\w+\.+(\w+)?\.?\w+\/',movie_link).group()
+            movie_link = movie_link.replace(matchObj,'http://m.anhtrang.org/')
             movie_title = BeautifulSoup(str(movie))('a')[0]['title']
             addDir(movie_title.encode('utf-8'),movie_link,3,movie_img,False,None)
-
         pages = soup('a',{'class':'pagelink'})
         for p in pages:
             plink = BeautifulSoup(str(p))('a')[0]['href']
             ptitle = BeautifulSoup(str(p))('a')[0].contents[0]
             addDir(ptitle,plink,2,logo,False,None)
-
     except:pass
+
 def episodes(url):
     try:
         link = GetContentMobile(url)

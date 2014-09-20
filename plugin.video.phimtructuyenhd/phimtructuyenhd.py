@@ -1,6 +1,6 @@
 __author__ = 'traitravinh'
 import urllib, urllib2, re, os, sys
-import xbmcaddon,xbmcplugin,xbmcgui
+import xbmcaddon,xbmcplugin,xbmcgui,urlresolver
 from bs4 import BeautifulSoup
 
 mysettings = xbmcaddon.Addon(id='plugin.video.phimtructuyenhd')
@@ -13,7 +13,7 @@ logo ='http://www.iconki.com/icons/3D/Mimetypes-icons/movie.png'
 def index(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        soup = BeautifulSoup(link)
         li_a = soup('li',{'data-theme':'a'})
         for li in li_a:
             lilink = BeautifulSoup(str(li))('a')[0]['href']
@@ -34,7 +34,10 @@ def home():
     try:
         addDir('Search',searchlink,6,logo,None,'',False)
         link = urllib2.urlopen(home_link).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        newlink = ''.join(link.splitlines()).replace('\t','')
+        soup = BeautifulSoup(newlink)
+        # print str(len(soup))
+        # print soup[0]
         navbar = soup('div',{'data-role':'navbar'})
         navtitle = BeautifulSoup(str(navbar[0]))('a')
         for n in range(1,len(navtitle)-1):
@@ -47,8 +50,10 @@ def home():
 def index_nav(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        # print link
+        soup = BeautifulSoup(link)
         li_a = soup('li',{'data-theme':'a'})
+        # print li_a
 
         for li in range(0,len(li_a)):# for 18+ movies, delete -1
             lilink =BeautifulSoup(str(li_a[li]))('a')[0]['href']
@@ -63,7 +68,7 @@ def index_nav(url):
 def server(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        soup = BeautifulSoup(link)
         svname = soup('span',{'class':'svname'})
         index_num = 0
         for s in svname:
@@ -75,7 +80,7 @@ def server(url):
 def episode(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        soup = BeautifulSoup(link)
         svep = soup('span',{'class':'svep'})
         eps = BeautifulSoup(str(svep[inum]))('a')
         for e in eps:
@@ -88,7 +93,7 @@ def episode(url):
 def videolink(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        soup = BeautifulSoup(link)
         if mirror=='YouTube:':
             source =re.compile('http://www.youtube.com/embed/(.+?)\?').findall(str(soup('iframe')[0]['src']))[0]
         else:
@@ -99,18 +104,20 @@ def videolink(url):
 
 def PlayVideo(url,mirror):
     try:
-        if mirror =='YouTube:':
-            vUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(url).replace('?','')
-        elif mirror == 'Dailymotion:':
-            vUrl = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
-        elif mirror =='Picasa:':
-            vUrl = url
+
+        if mirror.lower() == 'dailymotion:':
+            hostedmedia = urlresolver.HostedMediaFile('http://www.dailymotion.com/embed/video/%s'%(url))
+            videoId=hostedmedia.resolve()
+            # videoId = "plugin://plugin.video.dailymotion_com/?mode=playVideo&url="+urllib.quote_plus(url).replace('?','')
+        elif mirror.lower() == 'youtube:':
+            hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(url))
+            videoId = hostedmedia.resolve()
         else:
-            vUrl=url
+            videoId=url
 
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=str(vUrl)))
-        xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=str(videoId)))
+        # xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
     except:pass
 
 def loadHistory(url):
@@ -212,6 +219,7 @@ def addLink(name,url,mode,mirror,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})#, "overlay":6,"watched":False})
     liz.setProperty('mimetype', 'video/x-msvideo')
+    liz.setProperty("IsPlayable","true")
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 

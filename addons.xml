@@ -2,7 +2,7 @@
 <addons>
 <addon
   id="plugin.video.anhtrang_org"
-  version="0.0.3"
+  version="0.0.4"
   name="[COLOR ffffff00]Anh[/COLOR][COLOR ffffa500]Trang[/COLOR][COLOR ffffffff].ORG[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -56,7 +56,7 @@
 
 <addon
   id="plugin.video.nhaccuatui"
-  version="1.1.1"
+  version="1.1.2"
   name="[COLOR FF00BFFF]NhacCuaTui[/COLOR]"
   provider-name="Wonnykc">
   <requires>
@@ -113,7 +113,7 @@
 
 <addon
   id="plugin.video.phimtructuyenhd"
-  version="1.0.1"
+  version="1.0.2"
   name="[COLOR red]Phim[/COLOR][COLOR FF0000FF]Truc[/COLOR][COLOR FF1E90FF]Tuyen[/COLOR][COLOR FFDAA520]HD[/COLOR]"
   provider-name="traitravinh">
   <requires>

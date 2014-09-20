@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon
   id="plugin.video.phimtructuyenhd"
-  version="1.0.1"
+  version="1.0.2"
   name="[COLOR red]Phim[/COLOR][COLOR FF0000FF]Truc[/COLOR][COLOR FF1E90FF]Tuyen[/COLOR][COLOR FFDAA520]HD[/COLOR]"
   provider-name="traitravinh">
   <requires>        		
