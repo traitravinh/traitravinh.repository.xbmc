@@ -19,7 +19,7 @@ def home():
         addLink(channelTitle,channelLink,2,channelImage)
 
 def videoLink(url):
-    link = urllib2.urlopen(homelink).read()
+    link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
     newlink = ''.join(link.splitlines()).replace('\t','')
     vlink = re.compile('file: "(.+?)",height').findall(newlink)
