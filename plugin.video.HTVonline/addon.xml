@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="plugin.video.HTVonline"
+  version="0.0.1"
+  name="HTVonline"
+  provider-name="traitravinh">
+  <requires>       		
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="htvonline.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Watch liveTV</summary>
+    <description>Watch liveTV</description>
+    <platform>all</platform>
+  </extension>
+</addon>

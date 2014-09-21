@@ -55,6 +55,24 @@
 </addon>
 
 <addon
+  id="plugin.video.HTVonline"
+  version="0.0.1"
+  name="HTVonline"
+  provider-name="traitravinh">
+  <requires>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="htvonline.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Watch liveTV</summary>
+    <description>Watch liveTV</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon
   id="plugin.video.nhaccuatui"
   version="1.1.2"
   name="[COLOR FF00BFFF]NhacCuaTui[/COLOR]"
