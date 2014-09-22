@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon
   id="plugin.video.phatam"
-  version="1.0.0"
+  version="1.0.1"
   name="[COLOR white]phatam[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -12,7 +12,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>Watch KinhPhat</summary>
-    <description>Watch (Vietnamese)Videos</description>
+    <description>A-Di-Da-Phat</description>
     <platform>all</platform>
   </extension>
 </addon>

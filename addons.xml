@@ -31,14 +31,14 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>Watch Soccer highlight from baobondaplus.vn</summary>
-    <description>Watch soccer highlight (Vietnamese)Videos</description>
+    <description>Watch soccer highlight (Vietnamese)Videos. Not working</description>
     <platform>all</platform>
   </extension>
 </addon>
 
 <addon
   id="plugin.video.bongdatructuyen"
-  version="1.0.2"
+  version="1.0.3"
   name="[COLOR FFFFFFFF]bongda[/COLOR][COLOR FF32CD32]tructuyen[/COLOR][COLOR FFFFFFFF].vn[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -49,15 +49,15 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>Watch Soccer Live/Highlights using SopCast, AceStream. [COLOR red]Require[/COLOR] [COLOR FFFFA500]P2P-Streams addons[/COLOR] [COLOR red]to play streams[/COLOR]</summary>
-    <description>Watch Soccer Live/Highlights Videos.</description>
+    <description>Watch Soccer Live/Highlights Videos. Need p2p-streams addon installed and configured to work</description>
     <platform>all</platform>
   </extension>
 </addon>
 
 <addon
   id="plugin.video.HTVonline"
-  version="0.0.3"
-  name="HTVonline"
+  version="0.0.4"
+  name="[COLOR ffff0000]H[/COLOR][COLOR ff32cd32]T[/COLOR][COLOR ff0000ff]V[/COLOR][COLOR ffffffff]online[/COLOR]"
   provider-name="traitravinh">
   <requires>
   </requires>
@@ -76,7 +76,7 @@
   id="plugin.video.nhaccuatui"
   version="1.1.2"
   name="[COLOR FF00BFFF]NhacCuaTui[/COLOR]"
-  provider-name="Wonnykc">
+  provider-name="traitravinh">
   <requires>
 	<import addon="xbmc.python" version="2.1.0" />
     <import addon="script.common.plugin.cache" version="2.5.2" />
@@ -113,7 +113,7 @@
 
 <addon
   id="plugin.video.phatam"
-  version="1.0.0"
+  version="1.0.1"
   name="[COLOR white]phatam[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -124,7 +124,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>Watch KinhPhat</summary>
-    <description>Watch (Vietnamese)Videos</description>
+    <description>A-Di-Da-Phat</description>
     <platform>all</platform>
   </extension>
 </addon>
@@ -214,7 +214,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>Watch Movies</summary>
-    <description>Watch (Vietnamese)Videos</description>
+    <description>Watch (Vietnamese)Videos. Not working!!!!</description>
     <platform>all</platform>
   </extension>
 </addon>

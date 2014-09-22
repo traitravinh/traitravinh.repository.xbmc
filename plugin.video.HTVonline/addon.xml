@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon
   id="plugin.video.HTVonline"
-  version="0.0.3"
-  name="HTVonline"
+  version="0.0.4"
+  name="[COLOR ffff0000]H[/COLOR][COLOR ff32cd32]T[/COLOR][COLOR ff0000ff]V[/COLOR][COLOR ffffffff]online[/COLOR]"
   provider-name="traitravinh">
   <requires>       		
   </requires>
