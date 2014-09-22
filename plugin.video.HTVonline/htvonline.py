@@ -6,8 +6,11 @@ from bs4 import BeautifulSoup
 # import SimpleDownloader as downloader
 
 homelink = 'http://www.htvonline.com.vn/livetv'
+logo = 'http://static.htvonline.com.vn/layout/images/logo.png'
 
 def home():
+    addDir('[COLOR ffff0000]Phim [/COLOR][COLOR ff32cd32]Viet [/COLOR][COLOR ff0000ff]Nam[/COLOR]','http://www.htvonline.com.vn/phim-viet-nam',1,logo)
+    addDir('[COLOR ffff0000]T[/COLOR][COLOR ff32cd32]V[/COLOR][COLOR ff0000ff] Show[/COLOR]','http://www.htvonline.com.vn/shows',3,logo)
     link = urllib2.urlopen(homelink).read()
     soup = BeautifulSoup(link.decode('utf-8'))
     divLiveTV = soup.findAll('div',{'id':'divLiveTV'})
@@ -18,11 +21,68 @@ def home():
         channelImage = BeautifulSoup(str(channel))('img')[0]['src']
         addLink(channelTitle,channelLink,2,channelImage)
 
-def videoLink(url):
+def index(url):
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
+    atags = soup.findAll('a',{'class':'mh-grids4-img'})
+    icount = 0
+    for a in atags:
+        aSoup = BeautifulSoup(str(a))
+        alink = aSoup('a')[0]['href'].encode('utf-8')
+        aImage = aSoup('img')[0]['data-original']
+        aTitle = soup('p',{'class':'name-en'})[icount].contents[0].encode('utf-8')
+
+        icount+=1
+        addLink(aTitle,alink,2,aImage)
+
+    paging = soup.findAll('div',{'class':'paging'})[0]
+    pagelist = BeautifulSoup(str(paging))('a')
+    for p in range(1,len(pagelist)):
+        plink = BeautifulSoup(str(pagelist[p]))('a')[0]['href']
+        ptitle = BeautifulSoup(str(pagelist[p]))('a')[0].contents[0]
+        if plink.find('javascript:void(0)')==-1:
+            addDir(ptitle,plink,1,logo)
+
+def indexdir(url):
+    link = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(link.decode('utf-8'))
+    atags = soup.findAll('a',{'class':'mh-grids4-img'})
+    icount = 0
+    for a in atags:
+        aSoup = BeautifulSoup(str(a))
+        alink = aSoup('a')[0]['href'].encode('utf-8')
+        aImage = aSoup('img')[0]['data-original']
+        aTitle = soup('p',{'class':'name-en'})[icount].contents[0].encode('utf-8')
+
+        icount+=1
+        # addLink(aTitle,alink,2,aImage)
+        addDir(aTitle,alink,4,aImage)
+
+    paging = soup.findAll('div',{'class':'paging'})[0]
+    pagelist = BeautifulSoup(str(paging))('a')
+    for p in range(1,len(pagelist)):
+        plink = BeautifulSoup(str(pagelist[p]))('a')[0]['href']
+        ptitle = BeautifulSoup(str(pagelist[p]))('a')[0].contents[0]
+        if plink.find('javascript:void(0)')==-1:
+            addDir(ptitle,plink,1,logo)
+def episodes(url):
+    link = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(link.decode('utf-8'))
+    list_episodes = soup.findAll('div',{'id':'list_episodes'})
+    a_episodes = BeautifulSoup(str(list_episodes[0]))('a')
+    # print a_episodes[0]
+    try:
+        for a in a_episodes:
+            ahref = BeautifulSoup(str(a))('a')[0]['href']
+            aTitle = BeautifulSoup(str(BeautifulSoup(str(a)).a.next.next))('i')[0].contents[0]
+            addLink(str(aTitle).encode('utf-8'),ahref.encode('utf-8'),2,iconimage)
+    except:
+        addLink(name,url,2,iconimage)
+
+def videoLink(url):
+    link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
-    vlink = re.compile('file: "(.+?)",height').findall(newlink)
+    vlink = re.compile('file: "(.+?)",').findall(newlink)
     return vlink[0]
 
 def play(url):
@@ -40,6 +100,14 @@ def addLink(name,url,mode,iconimage):
     liz.setProperty('mimetype', 'video/x-msvideo')
     liz.setProperty("IsPlayable","true")
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
+    return ok
+
+def addDir(name, url, mode, iconimage):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)
+    ok=True
+    liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
+    liz.setInfo( type="Video", infoLabels={ "Title": name } )
+    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
 def get_params():
@@ -88,8 +156,12 @@ sysarg=str(sys.argv[1])
 if mode==None or url==None or len(url)<1:
     home()
 elif mode==1:
-    videoLink(url)
+    index(url)
 elif mode==2:
     play(url)
+elif mode==3:
+    indexdir(url)
+elif mode==4:
+    episodes(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))
