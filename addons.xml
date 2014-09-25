@@ -56,7 +56,7 @@
 
 <addon
   id="plugin.video.HTVonline"
-  version="0.0.4"
+  version="0.0.5"
   name="[COLOR ffff0000]H[/COLOR][COLOR ff32cd32]T[/COLOR][COLOR ff0000ff]V[/COLOR][COLOR ffffffff]online[/COLOR]"
   provider-name="traitravinh">
   <requires>

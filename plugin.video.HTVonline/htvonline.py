@@ -9,7 +9,7 @@ homelink = 'http://www.htvonline.com.vn/livetv'
 logo = 'http://static.htvonline.com.vn/layout/images/logo.png'
 
 def home():
-    addDir('[COLOR ffff0000]Phim [/COLOR][COLOR ff32cd32]Viet [/COLOR][COLOR ff0000ff]Nam[/COLOR]','http://www.htvonline.com.vn/phim-viet-nam',1,logo)
+    addDir('[COLOR ffff0000]Phim [/COLOR][COLOR ff32cd32]Viet [/COLOR][COLOR ff0000ff]Nam[/COLOR]','http://www.htvonline.com.vn/phim-viet-nam',3,logo)
     addDir('[COLOR ffff0000]T[/COLOR][COLOR ff32cd32]V[/COLOR][COLOR ff0000ff] Show[/COLOR]','http://www.htvonline.com.vn/shows',3,logo)
     link = urllib2.urlopen(homelink).read()
     soup = BeautifulSoup(link.decode('utf-8'))
@@ -68,14 +68,17 @@ def indexdir(url):
 def episodes(url):
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
-    list_episodes = soup.findAll('div',{'id':'list_episodes'})
-    a_episodes = BeautifulSoup(str(list_episodes[0]))('a')
-    # print a_episodes[0]
     try:
+        list_episodes = soup.findAll('div',{'class':'images_container'})
+        a_episodes = BeautifulSoup(str(list_episodes[0]))('a')
         for a in a_episodes:
             ahref = BeautifulSoup(str(a))('a')[0]['href']
-            aTitle = BeautifulSoup(str(BeautifulSoup(str(a)).a.next.next))('i')[0].contents[0]
-            addLink(str(aTitle).encode('utf-8'),ahref.encode('utf-8'),2,iconimage)
+        #     # aTitle = BeautifulSoup(str(BeautifulSoup(str(a)).a.next.next))('i')[0].contents[0]
+            aTitle = BeautifulSoup(str(a)).a.next.next
+        #     # aTitle = itags[0].contents[0]
+        #     # print aTitle
+        #     # addLink(str(aTitle).encode('utf-8'),ahref.encode('utf-8'),2,iconimage)
+            addLink(str(aTitle).replace('<i>','').replace('</i>',''),ahref.encode('utf-8'),2,iconimage)
     except:
         addLink(name,url,2,iconimage)
 
