@@ -149,7 +149,7 @@
 
 <addon
   id="plugin.video.phimvang"
-  version="1.0.3"
+  version="1.0.4"
   name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
   provider-name="traitravinh">
   <requires>

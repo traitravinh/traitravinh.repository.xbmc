@@ -129,12 +129,14 @@ if ( __name__ == "__main__" ):
     #rezip files an move
     print 'Starting zip file creation...'
     rootdir = sys.path[0]
-    zipsdir = rootdir + '\zips'
+    #zipsdir = rootdir + '\zips'
+    zipsdir = os.path.join(rootdir,'zips')
 
     filesinrootdir = os.listdir(rootdir)
+    print filesinrootdir
     for x in filesinrootdir:
-        if re.search("plugin|repository" , x):
-            foldertozip = rootdir+'\\'+x
+        if re.search("plugin|repository" , x):            
+            foldertozip = os.path.join(rootdir,x)
             zipfilename = x + '.zip'
             zipfilenamefirstpart = zipfilename[:-4]
             zipfilenamelastpart = zipfilename[len(zipfilename)-4:]
