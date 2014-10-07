@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="plugin.video.chiasenhac"
+  version="0.0.1"
+  name="[COLOR ff696969]C[/COLOR][COLOR ffff0000]S[/COLOR][COLOR ff696969]N[/COLOR]"
+  provider-name="traitravinh">
+  <requires>
+	<import addon="xbmc.python" version="2.1.0" />    
+    <import addon="script.common.plugin.cache" version="2.5.2" />    
+    <import addon="script.module.simple.downloader" version="1.9.4" />
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+            library="chiasenhac.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Chiasenhac</summary>
+    <description>Search and play/download music on chiasenhac.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>

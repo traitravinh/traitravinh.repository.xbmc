@@ -31,7 +31,7 @@ def home():
 
 
 def index(url):
-    print url
+
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
     h2s = soup('h2')
