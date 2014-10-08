@@ -175,11 +175,11 @@ def PlayVideo(url):
             vUrl =rtmp_link(url)
         else:
             vUrl=url
-        if mysettings.getSetting('descriptions')=='true':
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=vUrl))
-        else:
-            listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-            xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
+
+        listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
+        # xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
+        listitem.setPath(vUrl)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
     except:pass
 
 def addDir(name, url, mode, iconimage):
@@ -195,6 +195,7 @@ def addLink(name,url,mode,mirror,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})#, "overlay":6,"watched":False})
     liz.setProperty('mimetype', 'video/x-msvideo')
+    liz.setProperty("IsPlayable","true")
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 

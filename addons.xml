@@ -56,7 +56,7 @@
 
 <addon
   id="plugin.video.chiasenhac"
-  version="0.0.1"
+  version="0.0.2"
   name="[COLOR ff696969]C[/COLOR][COLOR ffff0000]S[/COLOR][COLOR ff696969]N[/COLOR]"
   provider-name="traitravinh">
   <requires>

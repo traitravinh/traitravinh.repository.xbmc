@@ -17,7 +17,6 @@ searchlink ='http://search.chiasenhac.com/search.php?s='
 while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
     addon.openSettings()
 
-
 def home():
     loadMenu(homelink)
     addDir('Downloaded [COLOR ffffd700]Audios[/COLOR]',downloadpath,11,logo,False,None)
@@ -28,63 +27,116 @@ def index_search(url):
     link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
     match = re.compile('<div class="m-left">(.+?)<div class="main-right">').findall(newlink)
+
     soup = BeautifulSoup(str(match[0]))
     tenbh = soup('div',{'class':'tenbh'})
+    gen = soup('span',{'class':'gen'})
+    index=0
     for t in tenbh:
         tsoup = BeautifulSoup(str(t))
         ttitle = tsoup('a')[0].contents[0]
         tlink =homelink+tsoup('a')[0]['href']
         tartist = tsoup('p')[1].text
-        addLink(ttitle.encode('utf-8')+' - [COLOR ffffd700]'+tartist.encode('utf-8')+'[/COLOR]',tlink,4,logo)
+        try:
+            info = BeautifulSoup(str(gen[index]))('span')[0].next.next.next.next
+            if info==None:
+                info = BeautifulSoup(str(gen[index]))('span')[0].next.next.next
+
+            addLink('[COLOR ffff6347]['+str(info)+'][/COLOR] - '+ttitle.encode('utf-8')+' - [COLOR ffffd700]'+tartist.encode('utf-8')+'[/COLOR]',tlink,4,logo)
+        except:
+            pass
+        index +=1
+
+        # addLink(ttitle.encode('utf-8')+' - [COLOR ffffd700]'+tartist.encode('utf-8')+'[/COLOR]',tlink,4,logo)
 
     matchpages=re.compile('<div class="padding">(.+?)</div>').findall(newlink)
     soupli = BeautifulSoup(str(matchpages[0]))
     lipage = soupli('li')
     for l in lipage:
-        lsoup = BeautifulSoup(str(l))
-        ltitle = lsoup('a')[0].contents[0]
-        llink = lsoup('a')[0]['href']
-        addDir(ltitle,llink,10,iconimage,False,None)
+        try:
+            l['class']  #active_page
+        except KeyError:
+            lsoup = BeautifulSoup(str(l))
+            ltitle = lsoup('a')[0].contents[0]
+            llink = lsoup('a')[0]['href']
+            addDir(ltitle,llink,10,iconimage,False,None)
 
 def medialist(url):
     link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
     match = re.compile('<div class="m-left">(.+?)<div class="main-right">').findall(newlink)
     soup = BeautifulSoup(str(match[0]))
-    gen = soup('div',{'class':'text2'})
-    if len(gen)<=0:
-        gen = soup('div',{'class':'gensmall'})
-    if len(gen)<=0:
-        gen = soup('span',{'class':'gen'})
-    for g in gen:
-        try:
+
+    gen = soup('div',{'class':'list-r list-1'})
+    if len(gen)>0:
+        for g in gen:
             gsoup = BeautifulSoup(str(g))
-            if len(gsoup('a'))>1:
-                gtitle = gsoup('a')[2]['title']
-                glink =homelink+gsoup('a')[1]['href']
-                if str(gsoup('a')[0]).find('img')!=-1:
-                    gimage = gsoup('img')[0]['src']
-                else:
-                    gimage=logo
+            gtitle = gsoup('a')[0]['title']
+            glink =homelink+gsoup('a')[0]['href']
+            if str(gsoup('a')[0]).find('img')!=-1:
+                gimage = gsoup('img')[0]['src']
             else:
+                gimage=logo
+            info = gsoup('span',{'style':'color: red'})
+            if len(info)>0:
+                infotext = info[0].text
+                gtitle = '[COLOR ffff6347]['+infotext+'][/COLOR] - '+gtitle
+            addLink(gtitle.encode('utf-8'),glink,4,gimage)
+
+    gen = soup('div',{'class':'list-l list-1'})
+    if len(gen)>0:
+        for g in gen:
+                gsoup = BeautifulSoup(str(g))
                 gtitle = gsoup('a')[0]['title']
                 glink =homelink+gsoup('a')[0]['href']
                 if str(gsoup('a')[0]).find('img')!=-1:
                     gimage = gsoup('img')[0]['src']
                 else:
                     gimage=logo
+                info = gsoup('span',{'style':'color: red'})
+                if len(info)>0:
+                    infotext = info[0].text
+                    gtitle = '[COLOR ffff6347]['+infotext+'][/COLOR] - '+gtitle
+                addLink(gtitle.encode('utf-8'),glink,4,gimage)
+    else:
+        gen = soup('div',{'class':'text2'})
+        if len(gen)<=0:
+            gen = soup('div',{'class':'gensmall'})
+        if len(gen)<=0:
+            gen = soup('span',{'class':'gen'})
 
-            addLink(gtitle.encode('utf-8'),glink,4,gimage)
-        except:pass
+        for g in gen:
+            try:
+                gsoup = BeautifulSoup(str(g))
+                if len(gsoup('a'))>1:
+                    gtitle = gsoup('a')[2]['title']
+                    glink =homelink+gsoup('a')[1]['href']
+                    if str(gsoup('a')[0]).find('img')!=-1:
+                        gimage = gsoup('img')[0]['src']
+                    else:
+                        gimage=logo
+                else:
+                    gtitle = gsoup('a')[0]['title']
+                    glink =homelink+gsoup('a')[0]['href']
+                    if str(gsoup('a')[0]).find('img')!=-1:
+                        gimage = gsoup('img')[0]['src']
+                    else:
+                        gimage=logo
+
+                addLink(gtitle.encode('utf-8'),glink,4,gimage)
+            except:pass
     try:
         matchpages=re.compile('<div class="padding">(.+?)</div>').findall(newlink)
         soupli = BeautifulSoup(str(matchpages[0]))
         lipage = soupli('li')
         for l in lipage:
-            lsoup = BeautifulSoup(str(l))
-            ltitle = lsoup('a')[0].contents[0]
-            llink =homelink+lsoup('a')[0]['href']
-            addDir(ltitle,llink,3,iconimage,False,None)
+            try:
+                l['class']  #active_page
+            except KeyError:
+                lsoup = BeautifulSoup(str(l))
+                ltitle = lsoup('a')[0].contents[0]
+                llink =homelink+lsoup('a')[0]['href']
+                addDir(ltitle,llink,3,iconimage,False,None)
     except:pass
 
 def medialink(url):
@@ -107,7 +159,7 @@ def download(url):
         url=medialink(url)
         filename = str(re.compile('[a-zA-Z0-9-_%]+\.\w+$').findall(url)[0])
         filename= urllib2.unquote(filename).replace(' ','').replace('-','')
-        params = {"url": url, "download_path": downloadpath, "Title": filename}
+        params = {"url": url, "download_path": downloadpath, "Title": '[COLOR ffff0000]'+filename+'[/COLOR]'}
         if os.path.isfile(downloadpath+filename):
             dialog = xbmcgui.Dialog()
             if dialog.yesno('Download message','File exists! re-download?'):
