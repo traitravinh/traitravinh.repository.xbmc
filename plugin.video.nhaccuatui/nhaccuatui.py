@@ -13,8 +13,8 @@ mysettings = xbmcaddon.Addon(id='plugin.video.nhaccuatui')
 downloadpath = mysettings.getSetting('download_path')
 searchlink ='http://www.nhaccuatui.com/tim-kiem?q='
 home_link = 'http://www.nhaccuatui.com/'
-logo='http://stc.nct.nixcdn.com/static_v8/images/share/logo-nct.jpg'
-# pl=xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+logo='http://stc.id.nixcdn.com/10/images/logo_600x600.png'
+
 while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
     addon.openSettings()
 
@@ -22,6 +22,7 @@ def Home():
     addDir('[COLOR FF00BFFF]Search[/COLOR]',searchlink,1,logo,'',False,None)
     addDir('Downloaded [COLOR blue]Audios[/COLOR]',downloadpath,8,logo,'',False,None)
     addDir('Downloaded [COLOR ffff69b4]Videos[/COLOR]',downloadpath,8,logo,'',False,None)
+    addLink('N+ Live','rtmp://123.30.134.108:1935/live playpath=nctlive swfUrl=http://p.jwpcdn.com/6/7/jwplayer.flash.swf live=1 timeout=15 swfVfy=1 pageUrl=http://www.xemtvhd.com/xemtvhd/index.php',6,logo,'')
 
 def loadHistory(url):
     try:
@@ -38,7 +39,6 @@ def loadHistory(url):
 
 def deleteSearch():
     try:
-        # print str(inum)
         searches = getStoredSearch()
         searches = eval(searches)
         del(searches[inum])
@@ -98,8 +98,6 @@ def Search(url):
 def getStoredSearch():
     try:
         searches = mysettings.getSetting('store_searches')
-        # if len(searches)==0:
-        #     searches="['hello']"
         return searches
     except:pass
 
@@ -108,14 +106,19 @@ def saveStoredSearch(param):
         mysettings.setSetting('store_searches',repr(param))
     except:pass
 
+def GetContent(url):
+    req = urllib2.Request(url)
+    req.add_unredirected_header('User-agent','Mozilla/5.0')
+    response = urllib2.urlopen(req).read()
+    return response
 
 def index_search(url):
     try:
-        link = urllib2.urlopen(url).read()
+        print url
+        link = GetContent(url)
         newlink = ''.join(link.splitlines()).replace('\t','')
-
         #Because of bugs in Beautifulsoup(can't parse whole newlink) so needs to use regex to get part of document first to use beautifulsoup
-        match = re.compile('<ul class="search_control_select">(.+?)<a href="javascript:;" id="search_follow"').findall(newlink)
+        match = re.compile('<ul class="search_control_select">(.+?)<a href="javascript:').findall(newlink)
         soup = BeautifulSoup(match[0].replace('\t',''))
         # search_control_select = soup('ul',{'class':'search_control_select'})
         # li_soup = BeautifulSoup(str(search_control_select[0]))('a')
@@ -177,7 +180,6 @@ def search_return(url,cname):
             except:
                 plink = psoup('a')[0]['href']
                 ptitle = psoup('a')[0].contents[0]
-                # print ptitle.decode('utf-8')
                 if ptitle=='&larr;':
                     ptitle='Previous'
                 elif ptitle =='&rarr;':
@@ -204,7 +206,6 @@ def getXML(url):
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
 
-        #since BSoup not working, switch to full regex
         # soup = BeautifulSoup(link.decode('utf-8'))
         # flash_playing = soup('div',{'class':'box_playing'})
         # file = re.compile('file=(.+?)" /').findall(str(flash_playing[0]))[0]
@@ -303,7 +304,6 @@ def addLink(name,url,mode,iconimage,cname):
     else:
         contextmenuitems.append(('[COLOR red]Delete[/COLOR]','XBMC.Container.Update(%s?url=%s&mode=9)'%('plugin://plugin.video.nhaccuatui',urllib.quote_plus(url))))
     liz.addContextMenuItems(contextmenuitems,replaceItems=False)
-    # pl.add(u,liz)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 
