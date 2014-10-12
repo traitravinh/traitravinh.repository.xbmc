@@ -170,7 +170,7 @@
 
 <addon
   id="plugin.video.phimvang"
-  version="1.0.4"
+  version="1.0.5"
   name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
   provider-name="traitravinh">
   <requires>

@@ -31,7 +31,7 @@ def home():
 
 
 def index(url):
-
+    print url
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
     h2s = soup('h2')
@@ -65,9 +65,12 @@ def episode(url):
     soup = BeautifulSoup(link.decode('utf-8'))
     epis = soup('p',{'class':'epi'})
     elist = BeautifulSoup(str(epis[inum]))('a')
+    print '###### episodes#####\n'
     for i in range(1,len(elist)):
         esoup = BeautifulSoup(str(elist[i]))
         elink = root_link+esoup('a')[0]['href']
+
+        print elink
         etitle = esoup('a')[0].contents[0]
         addLink(etitle.encode('utf-8'),elink,4,iconimage)
 
@@ -80,6 +83,7 @@ def videolinks(url):
         final_link=vlink
     else:
         vlink = re.compile("'link':'(.+?)'}").findall(newlink)[0]
+        print '#####vLINK#####'
         print vlink
         final_link = medialink(vlink)
 
@@ -89,7 +93,16 @@ def videolinks(url):
 def medialink(url):
     link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
-    mlink = re.compile(',{"url":"(.+?)","height"').findall(newlink)
+    myregex = re.escape(url)+r'(.+?){"rel":"alternate"'
+    match=re.compile(myregex).findall(newlink)
+    if len(match)<=0:
+        myregex=re.escape(url)+r'(.+)'
+        match=re.compile(myregex).findall(newlink)
+    if len(match)<=0:
+        mlink = re.compile(',{"url":"(.+?)","height"').findall(newlink)
+    else:
+        mlink = re.compile(',{"url":"(.+?)","height"').findall(match[0])
+    # mlink = re.compile(',{"url":"(.+?)","height"').findall(newlink)
     if len(mlink)>1:
         return mlink[1]
     else:
@@ -99,9 +112,17 @@ def play(url):
 
     VideoUrl = videolinks(url)
     if VideoUrl.find('youtube')!=-1:
-        # VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
-        hostedmedia = urlresolver.HostedMediaFile(VideoUrl)
-        VideoUrl = hostedmedia.resolve()
+        match = re.compile('&.+').findall(VideoUrl)
+        if len(match)>0:
+            VideoUrl= VideoUrl.replace(match[0],'')
+        idregex = r'https?://www.youtube.com/watch\?v='+r'(.+)'
+        VideoUrl = re.compile(idregex).findall(VideoUrl)[0]
+
+        VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
+        # hostedmedia = urlresolver.HostedMediaFile(VideoUrl)
+        # print hostedmedia
+        # VideoUrl = hostedmedia.resolve()
+
 
     # listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
