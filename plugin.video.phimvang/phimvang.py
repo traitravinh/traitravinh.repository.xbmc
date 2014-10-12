@@ -31,7 +31,6 @@ def home():
 
 
 def index(url):
-    print url
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
     h2s = soup('h2')
@@ -65,12 +64,9 @@ def episode(url):
     soup = BeautifulSoup(link.decode('utf-8'))
     epis = soup('p',{'class':'epi'})
     elist = BeautifulSoup(str(epis[inum]))('a')
-    print '###### episodes#####\n'
     for i in range(1,len(elist)):
         esoup = BeautifulSoup(str(elist[i]))
         elink = root_link+esoup('a')[0]['href']
-
-        print elink
         etitle = esoup('a')[0].contents[0]
         addLink(etitle.encode('utf-8'),elink,4,iconimage)
 
@@ -83,8 +79,6 @@ def videolinks(url):
         final_link=vlink
     else:
         vlink = re.compile("'link':'(.+?)'}").findall(newlink)[0]
-        print '#####vLINK#####'
-        print vlink
         final_link = medialink(vlink)
 
     return final_link
