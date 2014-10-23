@@ -85,13 +85,19 @@ def videolinks(url):
 
 
 def medialink(url):
+    # print url
     link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
     myregex = re.escape(url)+r'(.+?){"rel":"alternate"'
     match=re.compile(myregex).findall(newlink)
     if len(match)<=0:
+        if url.find('&feat=directlink'):
+            url = str(url).replace('&feat=directlink', '')
         myregex=re.escape(url)+r'(.+)'
         match=re.compile(myregex).findall(newlink)
+        # if len(match)<=0:
+        #     myregex=re.escape(url.replace('&feat=directlink','')+r'(.+)')
+        #     match=re.compile(myregex).findall(newlink)
     if len(match)<=0:
         mlink = re.compile(',{"url":"(.+?)","height"').findall(newlink)
     else:
