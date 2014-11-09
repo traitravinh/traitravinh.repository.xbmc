@@ -116,7 +116,7 @@
 
 <addon
   id="plugin.video.ourmatch_net"
-  version="1.0.4"
+  version="1.0.5"
   name="[COLOR white]Our[/COLOR][COLOR FFF4A460]Match[/COLOR][COLOR white].net[/COLOR]"
   provider-name="traitravinh">
   <requires>

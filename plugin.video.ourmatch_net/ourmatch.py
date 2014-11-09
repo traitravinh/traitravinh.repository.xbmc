@@ -68,9 +68,7 @@ def videoLink(url):
         # entry_content = soup('div',{'class':'entry-content rich-content'})
         # p_tag = BeautifulSoup(str(entry_content[0]))('p')
         match = re.compile('<div id="main-content">(.+?)<iframe src=').findall(newlink)
-
         p_tag = BeautifulSoup(str(match[0]))('p')
-
         for p in p_tag:
             ptext = BeautifulSoup(str(p)).p.contents[0]
             ptext = ptext.encode('utf-8')
@@ -81,23 +79,38 @@ def videoLink(url):
 
 def retrievVideoLink(url):
     try:
-        publisherId = re.compile('data-publisher-id="(.+?)" data-video-id').findall(url)
-        videoId = re.compile('data-video-id="(.+?)"').findall(url)
-        f4m_link = playwire_base_url+'v2/' + str(publisherId[0])+'/config/'+str(videoId[0])+'.json'
-        link = urllib2.urlopen(f4m_link).read()
-        f4m_src = re.compile('"src":"(.+?)"|\'').findall(str(link))
-        if str(f4m_src[0]).find('.f4m')!=-1:
-            nlink = urllib2.urlopen(f4m_src[0]).read()
-            vCode = re.compile('mp4:(.+?)" ').findall(str(nlink))
-            if len(vCode)>1:
-                sCode = vCode[1]
-            else:
-                sCode=vCode[0]
-            real_link = playwire_base_url+publisherId[0]+'/'+str(sCode)
-        elif str(f4m_src[0]).find('rtmp://streaming')!=-1:
-            real_link = str(f4m_src[0]).replace('rtmp://streaming','http://cdn').replace('mp4:','')
+        if str(url).find('data-publisher-id')!=-1:
+            publisherId = re.compile('data-publisher-id="(.+?)" data-video-id').findall(url)
+            videoId = re.compile('data-video-id="(.+?)"').findall(url)
 
-        return real_link
+            f4m_link = playwire_base_url+'v2/' + str(publisherId[0])+'/config/'+str(videoId[0])+'.json'
+            link = urllib2.urlopen(f4m_link).read()
+            f4m_src = re.compile('"src":"(.+?)"|\'').findall(str(link))
+            if str(f4m_src[0]).find('.f4m')!=-1:
+                nlink = urllib2.urlopen(f4m_src[0]).read()
+                vCode = re.compile('mp4:(.+?)" ').findall(str(nlink))
+                if len(vCode)>1:
+                    sCode = vCode[1]
+                else:
+                    sCode=vCode[0]
+                real_link = playwire_base_url+publisherId[0]+'/'+str(sCode)
+            elif str(f4m_src[0]).find('rtmp://streaming')!=-1:
+                real_link = str(f4m_src[0]).replace('rtmp://streaming','http://cdn').replace('mp4:','')
+
+            return real_link
+        else:
+            manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('player.json','manifest.f4m')
+            hosting_id = re.compile('http://config.playwire.com/(.+?)/videos').findall(url)[0]
+            link = urllib2.urlopen(manifest_link).read()
+            newlink = ''.join(link.splitlines()).replace('\t','')
+            base_url = re.compile('<baseURL>(.+?)</baseURL>').findall(newlink)[0]
+            if newlink.find('video-hd.mp4?hosting_id=')!=-1:
+                media_id = '/video-hd.mp4?hosting_id='+hosting_id
+            else:
+                media_id='/video-sd.mp4?hosting_id='+hosting_id
+            real_link = base_url+media_id
+            return real_link
+
     except:pass
 
 def PlayVideo(url):
