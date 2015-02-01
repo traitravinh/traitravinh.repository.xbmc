@@ -2,8 +2,8 @@ __author__ = 'traitravinh'
 import urllib, urllib2, re, os, sys
 from bs4 import BeautifulSoup
 import xbmcaddon,xbmcplugin,xbmcgui
-import urlresolver
-import SimpleDownloader as downloader
+# import urlresolver
+# import SimpleDownloader as downloader
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
@@ -182,8 +182,9 @@ def play(url):
         xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(addonname,message, time, iconimage))
         videoId = videoLink(url)
         if videoId.find('youtube')!=-1:
-            hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(re.compile('http://www.youtube.com/embed/(.+?)\?').findall(videoId)[0]))
-            videoId = hostedmedia.resolve()
+            # hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(re.compile('http://www.youtube.com/embed/(.+?)\?').findall(videoId)[0]))
+            # videoId = hostedmedia.resolve()
+            videoId = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(videoId).replace('?','')
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)

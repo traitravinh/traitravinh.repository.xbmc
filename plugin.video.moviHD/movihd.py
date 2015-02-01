@@ -1,6 +1,6 @@
 # __author__ = 'traitravinh'
 import urllib, urllib2, re, os, sys
-import xbmcaddon,xbmcplugin,xbmcgui
+import xbmcaddon,xbmcplugin,xbmcgui,requests
 from bs4 import BeautifulSoup
 
 
@@ -17,12 +17,14 @@ logo = 'http://movihd.net/img/logo.png'
 def GetContent(url):
     req = urllib2.Request(url)
     req.add_unredirected_header('User-agent','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+    # req.add_header('User-agent','Mozilla/5.0')
     response = urllib2.urlopen(req).read()
     return response
 
 def home():
-    link = GetContent(homelink)
-    soup = BeautifulSoup(link)
+    # link = GetContent(homelink)
+    link = requests.get(homelink)
+    soup = BeautifulSoup(link.text)
     catli = soup('li')
     for li in range(0,34):
         lisoup = BeautifulSoup(str(catli[li]))
@@ -36,8 +38,9 @@ def home():
             addDir(lititle,lilink,1,logo,False,None)
 
 def index(url):
-    link = GetContent(url)
-    soup = BeautifulSoup(link)
+    # link = GetContent(url)
+    link = requests.get(url)
+    soup = BeautifulSoup(link.text)
     blockbase = soup('div',{'class':'block-base movie'})
     for b in blockbase:
         bsoup = BeautifulSoup(str(b))
@@ -58,8 +61,9 @@ def index(url):
         addDir(ptitle,plink,1,iconimage,False,None)
 
 def episodes(url):
-    link = GetContent(url)
-    soup = BeautifulSoup(link)
+    # link = GetContent(url)
+    link = requests.get(url)
+    soup = BeautifulSoup(link.text)
     episodes =BeautifulSoup(str(soup('div',{'class':'action left'})[0]))('a')
     for e in episodes:
         esoup = BeautifulSoup(str(e))
@@ -72,8 +76,10 @@ def videolinks(url):
         xml_link=url
     else:
         xml_link =homelink+'/playlist/'+re.compile('http://movihd.net/phim/(.+?)_').findall(url)[0]+'_server-2.xml'
-    link = GetContent(xml_link)
-    soup = BeautifulSoup(link)
+    # link = GetContent(xml_link)
+    # soup = BeautifulSoup(link)
+    link = requests.get(xml_link)
+    soup = BeautifulSoup(link.text)
     media = homelink+soup('item')[0].next.next.next.next['url']
     return media
 

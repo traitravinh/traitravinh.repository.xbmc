@@ -95,10 +95,11 @@
 
 <addon
   id="plugin.video.moviHD"
-  version="0.0.1"
+  version="0.0.2"
   name="moviHD.net"
   provider-name="traitravinh">
   <requires>
+    <import addon="script.module.requests" version="2.4.3" />
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="movihd.py">
