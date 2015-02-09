@@ -1,8 +1,9 @@
 __author__ = 'traitravinh'
 import urllib, urllib2, re, os, sys
 import xbmcaddon,xbmcplugin,xbmcgui
+import httplib
 from bs4 import BeautifulSoup
-import urlresolver
+# import urlresolver
 
 root_link = 'http://phimvang.org'
 logo = 'http://phimvang.com/sites/all/themes/news/logo.png'
@@ -22,7 +23,8 @@ while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+add
 def home():
     addDir('[COLOR ffffd700]Search[/COLOR]',searchlink,5,logo,False,None)
     link = urllib2.urlopen(root_link).read()
-    soup = BeautifulSoup(link.decode('utf-8'))
+    # newlink = ''.join(link.splitlines()).replace('\t','')
+    soup = BeautifulSoup(link)
     li_menu = BeautifulSoup(str(soup('div',{'id':'menu'})[0]))('li')
     for m in li_menu:
         mtitle = BeautifulSoup(str(m))('a')[0].contents[0]
@@ -34,11 +36,13 @@ def index(url):
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
     h2s = soup('h2')
+    # print h2s
     for h in h2s:
         hsoup = BeautifulSoup(str(h))
         hlink = root_link+hsoup('a')[0]['href'].replace('phim','xem-phim')
-        himage = hsoup('img')[0]['data-original']
-        htitle = hsoup('img')[0]['alt']
+        # print hlink
+        himage = hsoup('img')[1]['data-original']
+        htitle = hsoup('img')[1]['alt']
         addDir(htitle.encode('utf-8'),hlink,2,himage,False,None)
     try:
         paging = soup('div',{'class':'paging'})
@@ -64,7 +68,7 @@ def episode(url):
     soup = BeautifulSoup(link.decode('utf-8'))
     epis = soup('p',{'class':'epi'})
     elist = BeautifulSoup(str(epis[inum]))('a')
-    for i in range(1,len(elist)):
+    for i in range(0,len(elist)):
         esoup = BeautifulSoup(str(elist[i]))
         elink = root_link+esoup('a')[0]['href']
         etitle = esoup('a')[0].contents[0]
@@ -74,18 +78,23 @@ def videolinks(url):
     url = ''.join(url.split())
     link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
+    # print newlink
     if newlink.find('youtube')!=-1:
-        vlink = re.compile("'file' : '(.+?)',").findall(newlink)[0]
+        # vlink = re.compile("'file' : '(.+?)',").findall(newlink)[0]
+        vlink = re.compile('file : "(.+?)&amp').findall(newlink)[0]
         final_link=vlink
     else:
-        vlink = re.compile("'link':'(.+?)'}").findall(newlink)[0]
-        final_link = medialink(vlink)
+        # vlink = re.compile("'link':'(.+?)'}").findall(newlink)[0]
+        try:
+            vlinks = re.compile(',\{file: "(.+?)", label:"720p"').findall(newlink)[0]
+        except:
+            vlinks = re.compile('file: "(.+?)", label').findall(newlink)[0]
+        final_link=vlinks
 
     return final_link
 
 
 def medialink(url):
-    # print url
     link = urllib2.urlopen(url).read()
     newlink = ''.join(link.splitlines()).replace('\t','')
     myregex = re.escape(url)+r'(.+?){"rel":"alternate"'
@@ -111,6 +120,7 @@ def medialink(url):
 def play(url):
 
     VideoUrl = videolinks(url)
+    print VideoUrl
     if VideoUrl.find('youtube')!=-1:
         match = re.compile('&.+').findall(VideoUrl)
         if len(match)>0:
