@@ -20,7 +20,7 @@ def home():
     try:
         link = GetContent(homelink)
         newlink = ''.join(link.splitlines()).replace('\t','')
-        match = re.compile('<div class="division">(.+?)<div id="ad-right">').findall(newlink)
+        match = re.compile('<div class="division">(.+?)<div class="ads_mid">').findall(newlink)
 
         # soup = BeautifulSoup(str(link.replace(' ','').replace('\t','').replace('\n','')))
         # main_nav = soup('div',{'id':'allleagues'})
