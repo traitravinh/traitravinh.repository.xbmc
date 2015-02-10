@@ -97,7 +97,6 @@ def episode(url):
 def medialink(url):
     link = GetContent(url)
     soup = BeautifulSoup(link)
-    #print soup
     if link.find('youtube.com')!=-1:
         vlink = soup('iframe')[1]['src']
     elif link.find('<div id="player">')!=-1:
@@ -107,13 +106,13 @@ def medialink(url):
 
 def play(url):
     VideoUrl = medialink(url)
+    print VideoUrl
     if VideoUrl.find('youtube')!=-1:
         match = re.compile('&.+').findall(VideoUrl)
         if len(match)>0:
             VideoUrl= VideoUrl.replace(match[0],'')
-        idregex = r'https?://www.youtube.com/watch\?v='+r'(.+)'
+        idregex = r'https?://www.youtube.com/(?:embed/|watch\?v=)'+r'(.+?(?=\?)|.+)'
         VideoUrl = re.compile(idregex).findall(VideoUrl)[0]
-
         VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
 
     # listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
