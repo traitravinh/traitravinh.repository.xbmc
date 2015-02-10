@@ -97,7 +97,7 @@ def episode(url):
 def medialink(url):
     link = GetContent(url)
     soup = BeautifulSoup(link)
-    print soup
+    #print soup
     if link.find('youtube.com')!=-1:
         vlink = soup('iframe')[1]['src']
     elif link.find('<div id="player">')!=-1:
