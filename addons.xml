@@ -95,7 +95,7 @@
 
 <addon
   id="plugin.video.moviHD"
-  version="0.0.2"
+  version="0.0.3"
   name="moviHD.net"
   provider-name="traitravinh">
   <requires>

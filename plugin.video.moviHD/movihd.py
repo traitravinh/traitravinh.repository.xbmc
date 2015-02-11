@@ -8,11 +8,8 @@ addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
 addonname = addon.getAddonInfo('name')
 mysettings = xbmcaddon.Addon(id='plugin.video.movihd')
-
 homelink = 'http://movihd.net'
-# logo = addon.getAddonInfo('icon')
 logo = 'http://movihd.net/img/logo.png'
-
 
 def GetContent(url):
     req = urllib2.Request(url)
@@ -22,7 +19,6 @@ def GetContent(url):
     return response
 
 def home():
-    # link = GetContent(homelink)
     link = requests.get(homelink)
     soup = BeautifulSoup(link.text)
     catli = soup('li')
@@ -38,7 +34,6 @@ def home():
             addDir(lititle,lilink,1,logo,False,None)
 
 def index(url):
-    # link = GetContent(url)
     link = requests.get(url)
     soup = BeautifulSoup(link.text)
     blockbase = soup('div',{'class':'block-base movie'})
@@ -58,10 +53,9 @@ def index(url):
         plink = homelink+psoup('a')[0]['href']
         ptitle = psoup('a')[0].contents[0]
 
-        addDir(ptitle,plink,1,iconimage,False,None)
+        addDir(ptitle,plink,1,iconimage,False,inum)
 
 def episodes(url):
-    # link = GetContent(url)
     link = requests.get(url)
     soup = BeautifulSoup(link.text)
     episodes =BeautifulSoup(str(soup('div',{'class':'action left'})[0]))('a')
@@ -76,8 +70,6 @@ def videolinks(url):
         xml_link=url
     else:
         xml_link =homelink+'/playlist/'+re.compile('http://movihd.net/phim/(.+?)_').findall(url)[0]+'_server-2.xml'
-    # link = GetContent(xml_link)
-    # soup = BeautifulSoup(link)
     link = requests.get(xml_link)
     soup = BeautifulSoup(link.text)
     media = homelink+soup('item')[0].next.next.next.next['url']
