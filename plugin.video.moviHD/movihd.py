@@ -2,7 +2,8 @@
 import urllib, urllib2, re, os, sys
 import xbmcaddon,xbmcplugin,xbmcgui,requests
 from bs4 import BeautifulSoup
-
+import SimpleDownloader as downloader
+import xbmcvfs
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
@@ -10,11 +11,27 @@ addonname = addon.getAddonInfo('name')
 mysettings = xbmcaddon.Addon(id='plugin.video.movihd')
 homelink = 'http://movihd.net'
 logo = 'http://movihd.net/img/logo.png'
+downloader = downloader.SimpleDownloader()
+downloadpath = mysettings.getSetting('download_path')
+home = mysettings.getAddonInfo('path')
+
+addonUserDataFolder = xbmc.translatePath("special://profile/addon_data/"+addonID).decode('utf-8')
+libraryFolder = os.path.join(addonUserDataFolder, "library")
+libraryFolderMovies = os.path.join(libraryFolder, "Movies")
+custLibFolder = mysettings.getSetting('library_path')
+
+if not os.path.exists(os.path.join(addonUserDataFolder, "settings.xml")):
+    addon.openSettings()
+if not os.path.isdir(addonUserDataFolder):
+    os.mkdir(addonUserDataFolder)
+if not os.path.isdir(libraryFolder):
+    os.mkdir(libraryFolder)
+if not os.path.isdir(libraryFolderMovies):
+    os.mkdir(libraryFolderMovies)
 
 def GetContent(url):
     req = urllib2.Request(url)
     req.add_unredirected_header('User-agent','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
-    # req.add_header('User-agent','Mozilla/5.0')
     response = urllib2.urlopen(req).read()
     return response
 
@@ -45,7 +62,7 @@ def index(url):
         if inum==1:
             addDir(btitle,blink,4,bimage,False,None)
         else:
-            addLink(btitle,blink,3,bimage)
+            addLink(btitle,blink,3,bimage,btitle)
 
     pagination = BeautifulSoup(str(soup('div',{'class':'action'})[0]))('a')
     for p in pagination:
@@ -63,7 +80,7 @@ def episodes(url):
         esoup = BeautifulSoup(str(e))
         elink =homelink+'/playlist/'+re.compile("javascript:PlayFilm\('(.+?)'\)").findall(esoup('a')[0]['href'])[0]+'_server-2.xml'
         etitle = str(esoup('a')[0].contents[0].encode('utf-8'))
-        addLink(etitle,elink,3,iconimage)
+        addLink(etitle,elink,3,iconimage,etitle)
 
 def videolinks(url):
     if url.find('xml')!=-1:
@@ -79,6 +96,32 @@ def play(url):
     VideoUrl = videolinks(url)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
 
+def addToLibrary(url):
+    if mysettings.getSetting('cust_Lib_path')=='true':
+        newlibraryFolderMovies = custLibFolder
+    else:
+        newlibraryFolderMovies = libraryFolderMovies
+    movieFolderName = (''.join(c for c in unicode(gname, 'utf-8') if c not in '/\\:?"*|<>')).strip(' .')
+    newMovieFolderName=''
+    finalName=''
+    keyb = xbmc.Keyboard(name, '[COLOR ffffd700]Enter Title[/COLOR]')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        newMovieFolderName=keyb.getText()
+    if newMovieFolderName !='':
+        dir = os.path.join(newlibraryFolderMovies, newMovieFolderName)
+        finalName=newMovieFolderName
+    else:
+        dir = os.path.join(newlibraryFolderMovies, movieFolderName)
+        finalName=movieFolderName
+    print dir
+    if not os.path.isdir(dir):
+        xbmcvfs.mkdir(dir)
+        fh = xbmcvfs.File(os.path.join(dir, finalName+".strm"), 'w')
+        fh.write('plugin://'+addonID+'/?mode=3&url='+urllib.quote_plus(url))
+        fh.close()
+        # xbmc.executebuiltin('UpdateLibrary(video)')
+
 def addDir(name, url, mode, iconimage,edit,inum):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)
     ok=True
@@ -87,12 +130,16 @@ def addDir(name, url, mode, iconimage,edit,inum):
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
-def addLink(name,url,mode,iconimage):
+def addLink(name,url,mode,iconimage,gname):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
     liz.setProperty("IsPlayable","true")
+    contextmenuitems = []
+    contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=10)'%('plugin://plugin.video.moviHD',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    contextmenuitems.append(('[COLOR ff1e90ff]Add To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=5)'%('plugin://plugin.video.moviHD',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 
@@ -121,6 +168,8 @@ mode=None
 iconimage=None
 edit=None
 inum=None
+gname=None
+
 
 try:
         url=urllib.unquote_plus(params["url"])
@@ -146,6 +195,10 @@ try:
         inum=int(params["inum"])
 except:
         pass
+try:
+        gname=urllib.unquote_plus(params["gname"])
+except:
+        pass
 
 sysarg=str(sys.argv[1])
 
@@ -159,5 +212,7 @@ elif mode==3:
     play(url)
 elif mode==4:
     episodes(url)
+elif mode==5:
+    addToLibrary(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))

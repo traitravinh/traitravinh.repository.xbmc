@@ -3,8 +3,6 @@
 	<category label="General Settings">		
 		<setting id="download_path" type="folder" label="Download Path" default="" />
 		<setting id="cust_Lib_path" type="bool" label="Custom Library Folder" default="false" />
-		<setting id="library_path" type="folder" label="Library Folder" enable="eq(-1,true)" default="" />
-		<setting id="save_search" type="bool" label="Save Search" default="true"/>		
-		<setting id="store_searches" value="[]"/>
+		<setting id="library_path" type="folder" label="Library Folder" enable="eq(-1,true)" default="" />		
 	</category>	
 </settings>

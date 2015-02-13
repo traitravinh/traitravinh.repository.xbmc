@@ -1,7 +1,10 @@
 import urllib, urllib2, re, os, sys
 import xbmcaddon,xbmcplugin,xbmcgui
 import requests
+import string
 from bs4 import BeautifulSoup
+import SimpleDownloader as downloader
+import xbmcvfs
 
 
 homelink = 'http://m.vkool.net'
@@ -11,13 +14,26 @@ addonname = addon.getAddonInfo('name')
 mysettings = xbmcaddon.Addon(id='plugin.video.vkool')
 icon = addon.getAddonInfo('icon')
 mysettings = xbmcaddon.Addon(id='plugin.video.vkool')
+downloader = downloader.SimpleDownloader()
+downloadpath = mysettings.getSetting('download_path')
 home = mysettings.getAddonInfo('path')
 logo = addon.getAddonInfo('icon')
 
+addonUserDataFolder = xbmc.translatePath("special://profile/addon_data/"+addonID).decode('utf-8')
+libraryFolder = os.path.join(addonUserDataFolder, "library")
+libraryFolderMovies = os.path.join(libraryFolder, "Movies")
+custLibFolder = mysettings.getSetting('library_path')
+
 searchlink = 'http://m.vkool.net/search/'
 
-while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
+if not os.path.exists(os.path.join(addonUserDataFolder, "settings.xml")):
     addon.openSettings()
+if not os.path.isdir(addonUserDataFolder):
+    os.mkdir(addonUserDataFolder)
+if not os.path.isdir(libraryFolder):
+    os.mkdir(libraryFolder)
+if not os.path.isdir(libraryFolderMovies):
+    os.mkdir(libraryFolderMovies)
 
 def GetContent(url):
     headers = {'User-agent':'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'}
@@ -25,7 +41,7 @@ def GetContent(url):
     return response.text
 
 def home():
-    addDir('[COLOR ffffd700]Search[/COLOR]',searchlink,5,logo,False,None)
+    addDir('[COLOR ffffd700]Search[/COLOR]',searchlink,5,logo,False,None,'')
     link = GetContent(homelink)
     soup = BeautifulSoup(link)
     slists = soup('ul',{'class':'slist'})
@@ -36,7 +52,7 @@ def home():
             lsoup = BeautifulSoup(str(l))
             llink = lsoup('a')[0]['href']
             lname = lsoup('a')[0].contents[0]
-            addDir(lname.encode('utf-8'), llink, 1, logo, False, None)
+            addDir(lname.encode('utf-8'), llink, 1, logo, False, None,'')
 
 def category(url):
     link = GetContent(url)
@@ -48,7 +64,8 @@ def category(url):
         clink = cisoup('a')[0]['href']
         cimage = cisoup('img')[0]['src']
         # cinfo = cisoup('li')[3].next
-        addDir(cname.encode('utf-8'), clink.encode('utf-8'), 2, cimage, False, None)
+        gname = cname
+        addDir(cname.encode('utf-8'), clink.encode('utf-8'), 2, cimage, False, None,gname.encode('utf-8'))
     try:
         pagination = soup('div',{'class':'pagination'})
         page = BeautifulSoup(str(pagination[0]))('a')
@@ -59,10 +76,11 @@ def category(url):
             except:
                 ptitle = psoup('a')[0].contents[0]
                 plink = psoup('a')[0]['href']
-                addDir(ptitle.encode('utf-8'), plink.encode('utf-8'), 1, logo, False, None)
+                addDir(ptitle.encode('utf-8'), plink.encode('utf-8'), 1, logo, False, None,'')
     except:pass
 
 def serverlist(url):
+    print gname
     link = GetContent(url)
     soup = BeautifulSoup(link)
     serverlink = BeautifulSoup(str(soup('a',{'class':'click-watch button'})))('a')[0]['href']
@@ -73,11 +91,12 @@ def serverlist(url):
     inum = 0
     for si in range(0, len(server_item)):
         siname = BeautifulSoup(str(server_item[si]))('strong')[0].text
-        addDir(siname.encode('utf-8'), serverlink, 3, iconimage,False, inum)
+        addDir(siname.encode('utf-8'), serverlink, 3, iconimage,False, inum,gname)
         inum += 1
 
 
 def episode(url):
+    print gname
     link = GetContent(url)
     soup = BeautifulSoup(link)
     server_item = soup('div', {'class':'server_item'})[inum]
@@ -88,11 +107,11 @@ def episode(url):
             s['class']
             sname = '1'
             slink = ssoup('a')[0]['href']
-            addLink(sname, slink, 4, iconimage)
+            addLink(sname, slink, 4, iconimage,gname)
         except KeyError:
             slink = ssoup('a')[0]['href']
             sname = ssoup('a')[0].contents[0]
-            addLink(sname.encode('utf-8'), slink, 4, iconimage)
+            addLink(sname.encode('utf-8'), slink, 4, iconimage,gname)
 
 def medialink(url):
     link = GetContent(url)
@@ -118,18 +137,62 @@ def play(url):
     # listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
 
+def download(url):
+    try:
+        VideoUrl = medialink(url)
+
+        if VideoUrl.find('youtube')==-1:
+            filename = gname+'.mp4'
+            print 'Start downloading '+filename
+            print VideoUrl
+            params = {"url": VideoUrl, "download_path": downloadpath, "Title": gname}
+            if os.path.isfile(downloadpath+filename):
+                dialog = xbmcgui.Dialog()
+                if dialog.yesno('Download message','File exists! re-download?'):
+                    downloader.download(filename, params)
+            else:
+                downloader.download(filename, params)
+
+    except:pass
+
+def addToLibrary(url):
+    if mysettings.getSetting('cust_Lib_path')=='true':
+        newlibraryFolderMovies = custLibFolder
+    else:
+        newlibraryFolderMovies = libraryFolderMovies
+    movieFolderName = (''.join(c for c in unicode(gname, 'utf-8') if c not in '/\\:?"*|<>')).strip(' .')
+    newMovieFolderName=''
+    finalName=''
+    keyb = xbmc.Keyboard(name, '[COLOR ffffd700]Enter Title[/COLOR]')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        newMovieFolderName=keyb.getText()
+    if newMovieFolderName !='':
+        dir = os.path.join(newlibraryFolderMovies, newMovieFolderName)
+        finalName=newMovieFolderName
+    else:
+        dir = os.path.join(newlibraryFolderMovies, movieFolderName)
+        finalName=movieFolderName
+    print dir
+    if not os.path.isdir(dir):
+        xbmcvfs.mkdir(dir)
+        fh = xbmcvfs.File(os.path.join(dir, finalName+".strm"), 'w')
+        fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url))
+        fh.close()
+        # xbmc.executebuiltin('UpdateLibrary(video)')
+
 
 ######## SEARCH ###############################################################################################
 def loadHistory(url):
     try:
-        addDir('[COLOR ffffd700]Search[/COLOR]',url,6,logo,False,None)
+        addDir('[COLOR ffffd700]Search[/COLOR]',url,6,logo,False,None,'')
         if mysettings.getSetting('save_search')=='true':
             searches = getStoredSearch()
             if len(searches)!=0:
                 searches = eval(searches)
                 idn = 0
                 for s in searches:
-                    addDir(s,url+urllib.quote_plus(s)+'.html',1,logo,True,idn)
+                    addDir(s,url+urllib.quote_plus(s)+'.html',1,logo,True,idn,'')
                     idn+=1
     except:pass
 
@@ -199,8 +262,8 @@ def saveStoredSearch(param):
     except:pass
 ######## END SEARCH #########################################################################################
 
-def addDir(name, url, mode, iconimage,edit, inum):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)
+def addDir(name, url, mode, iconimage,edit, inum, gname):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)+"&gname="+urllib.quote_plus(gname)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name })
@@ -212,12 +275,17 @@ def addDir(name, url, mode, iconimage,edit, inum):
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
-def addLink(name,url,mode,iconimage):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)
+def addLink(name,url,mode,iconimage,gname):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&gname="+urllib.quote_plus(gname)
+    lu=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&gname="+urllib.quote_plus(gname)
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
     liz.setProperty("IsPlayable","true")
+    contextmenuitems = []
+    contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=10)'%('plugin://plugin.video.vkool',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    contextmenuitems.append(('[COLOR ff1e90ff]Add To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=11)'%('plugin://plugin.video.vkool',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 
@@ -246,6 +314,7 @@ mode=None
 iconimage=None
 edit=None
 inum=None
+gname=None
 
 try:
         url=urllib.unquote_plus(params["url"])
@@ -271,6 +340,10 @@ try:
         inum=int(params["inum"])
 except:
         pass
+try:
+        gname=urllib.unquote_plus(params["gname"])
+except:
+        pass
 
 sysarg=str(sys.argv[1])
 
@@ -294,5 +367,9 @@ elif mode==8:
     deleteSearch()
 elif mode==9:
     editSearch()
+elif mode==10:
+    download(url)
+elif mode==11:
+    addToLibrary(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))
