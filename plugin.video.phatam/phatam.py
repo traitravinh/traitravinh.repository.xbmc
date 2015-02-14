@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import httplib
 import urllib,urllib2,re,sys
 import xbmc
@@ -12,8 +13,8 @@ logo='http://www.phatam.com/video/templates/ngodung/images/logo.png'
 
 
 def home():
-    addDir('Chuyen Muc',homelink,3,logo)
-    addDir('Tac gia',homelink,4,logo)
+    addDir('Chuyên Mục',homelink,3,logo)
+    addDir('Tác Giả',homelink,4,logo)
     addDir('New Videos',homelink,7,logo)
 
 

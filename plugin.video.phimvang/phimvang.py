@@ -23,8 +23,6 @@ libraryFolder = os.path.join(addonUserDataFolder, "library")
 libraryFolderMovies = os.path.join(libraryFolder, "Movies")
 custLibFolder = mysettings.getSetting('library_path')
 
-# while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
-#     addon.openSettings()
 if not os.path.exists(os.path.join(addonUserDataFolder, "settings.xml")):
     addon.openSettings()
 if not os.path.isdir(addonUserDataFolder):
@@ -35,14 +33,14 @@ if not os.path.isdir(libraryFolderMovies):
     os.mkdir(libraryFolderMovies)
 
 def home():
-    addDir('[COLOR ffffd700]Search[/COLOR]',searchlink,5,logo,False,None)
+    addDir('[COLOR ffffd700]Search[/COLOR]',searchlink,5,logo,False,None,'')
     link = urllib2.urlopen(root_link).read()
     soup = BeautifulSoup(link)
     li_menu = BeautifulSoup(str(soup('div',{'id':'menu'})[0]))('li')
     for m in li_menu:
         mtitle = BeautifulSoup(str(m))('a')[0].contents[0]
         mlink = BeautifulSoup(str(m))('a')[0]['href']
-        addDir(mtitle.encode('utf-8'),root_link+mlink,1,logo,False,None)
+        addDir(mtitle.encode('utf-8'),root_link+mlink,1,logo,False,None,'')
 
 
 def index(url):
@@ -54,7 +52,7 @@ def index(url):
         hlink = root_link+hsoup('a')[0]['href'].replace('phim','xem-phim')
         himage = hsoup('img')[1]['data-original']
         htitle = hsoup('img')[1]['alt']
-        addDir(htitle.encode('utf-8'),hlink,2,himage,False,None)
+        addDir(htitle.encode('utf-8'),hlink,2,himage,False,None,htitle.encode('utf-8'))
     try:
         paging = soup('div',{'class':'paging'})
         pages = BeautifulSoup(str(paging[0]))('a')
@@ -63,7 +61,7 @@ def index(url):
             psoup = BeautifulSoup(str(p))
             ptitle = psoup('a')[0].contents[0]
             plink = root_link+psoup('a')[0]['href']
-            addDir(ptitle.encode('utf-8'),plink,1,logo,False,None)
+            addDir(ptitle.encode('utf-8'),plink,1,logo,False,None,'')
     except:pass
 
 def serverlist(url):
@@ -72,7 +70,7 @@ def serverlist(url):
     epis = soup('p',{'class':'epi'})
     for i in range(0,len(epis)):
         etitle = BeautifulSoup(str(epis[i]))('b')[0].contents[0]
-        addDir(etitle.encode('utf-8'),url,3,iconimage,False,i)
+        addDir(etitle.encode('utf-8'),url,3,iconimage,False,i,gname)
 
 def episode(url):
     link = urllib2.urlopen(url).read()
@@ -83,7 +81,7 @@ def episode(url):
         esoup = BeautifulSoup(str(elist[i]))
         elink = root_link+esoup('a')[0]['href']
         etitle = esoup('a')[0].contents[0]
-        addLink(etitle.encode('utf-8'),elink,4,iconimage,etitle.encode('utf-8'))
+        addLink(etitle.encode('utf-8'),elink,4,iconimage,gname)
 
 def videolinks(url):
     url = ''.join(url.split())
@@ -124,7 +122,7 @@ def medialink(url):
     else:
         return mlink[0]
 
-def play(url):
+def play(url,name):
     VideoUrl = videolinks(url)
     if VideoUrl.find('youtube')!=-1:
         match = re.compile('&.+').findall(VideoUrl)
@@ -137,9 +135,10 @@ def play(url):
         # print hostedmedia
         # VideoUrl = hostedmedia.resolve()
 
-
-    # listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
+    listitem = xbmcgui.ListItem(name, path=VideoUrl)
+    listitem.setInfo( type="Video", infoLabels={ "Title": name })
+    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+    # xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
 
 def addToLibrary(url):
     if mysettings.getSetting('cust_Lib_path')=='true':
@@ -162,7 +161,7 @@ def addToLibrary(url):
     if not os.path.isdir(dir):
         xbmcvfs.mkdir(dir)
         fh = xbmcvfs.File(os.path.join(dir, finalName+".strm"), 'w')
-        fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url))
+        fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url)+'&name='+urllib.quote_plus(finalName))
         fh.close()
 
 ############################################################################
@@ -170,14 +169,14 @@ def addToLibrary(url):
 ############################################################################
 def loadHistory(url):
     try:
-        addDir('[COLOR ffffd700]Search[/COLOR]',url,6,logo,False,None)
+        addDir('[COLOR ffffd700]Search[/COLOR]',url,6,logo,False,None,'')
         if mysettings.getSetting('save_search')=='true':
             searches = getStoredSearch()
             if len(searches)!=0:
                 searches = eval(searches)
                 idn = 0
                 for s in searches:
-                    addDir(s,(url+urllib.quote_plus(s).replace('+','-'))+'.html',1,logo,True,idn)
+                    addDir(s,(url+urllib.quote_plus(s).replace('+','-'))+'.html',1,logo,True,idn,s)
                     idn+=1
     except:pass
 
@@ -252,8 +251,8 @@ def saveStoredSearch(param):
 
 
 
-def addDir(name, url, mode, iconimage,edit,inum):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)
+def addDir(name, url, mode, iconimage,edit,inum,gname):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)+"&gname="+urllib.quote_plus(gname)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
@@ -266,6 +265,7 @@ def addDir(name, url, mode, iconimage,edit,inum):
     return ok
 
 def addLink(name,url,mode,iconimage,gname):
+    name = ''.join(["[", name, "] ", gname])
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
@@ -345,7 +345,7 @@ elif mode==2:
 elif mode==3:
     episode(url)
 elif mode==4:
-    play(url)
+    play(url,name)
 elif mode==5:
     loadHistory(url)
 elif mode==6:

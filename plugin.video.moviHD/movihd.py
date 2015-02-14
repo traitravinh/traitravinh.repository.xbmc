@@ -46,9 +46,9 @@ def home():
             lititle = lisoup('a')[0].next.next.next.encode('utf-8')
         lilink = homelink+lisoup('a')[0]['href']
         if lititle.find('PHIM B')!=-1:
-            addDir(lititle,lilink,1,logo,False,1)
+            addDir(lititle,lilink,1,logo,False,1,'')
         else:
-            addDir(lititle,lilink,1,logo,False,None)
+            addDir(lititle,lilink,1,logo,False,None,'')
 
 def index(url):
     link = requests.get(url)
@@ -60,7 +60,7 @@ def index(url):
         blink = homelink+bsoup('a')[0]['href']
         bimage = homelink+bsoup('img')[0]['src']
         if inum==1:
-            addDir(btitle,blink,4,bimage,False,None)
+            addDir(btitle,blink,4,bimage,False,None,btitle)
         else:
             addLink(btitle,blink,3,bimage,btitle)
 
@@ -70,7 +70,7 @@ def index(url):
         plink = homelink+psoup('a')[0]['href']
         ptitle = psoup('a')[0].contents[0]
 
-        addDir(ptitle,plink,1,iconimage,False,inum)
+        addDir(ptitle,plink,1,iconimage,False,inum,'')
 
 def episodes(url):
     link = requests.get(url)
@@ -80,7 +80,7 @@ def episodes(url):
         esoup = BeautifulSoup(str(e))
         elink =homelink+'/playlist/'+re.compile("javascript:PlayFilm\('(.+?)'\)").findall(esoup('a')[0]['href'])[0]+'_server-2.xml'
         etitle = str(esoup('a')[0].contents[0].encode('utf-8'))
-        addLink(etitle,elink,3,iconimage,etitle)
+        addLink(etitle,elink,3,iconimage,gname)
 
 def videolinks(url):
     if url.find('xml')!=-1:
@@ -92,9 +92,12 @@ def videolinks(url):
     media = homelink+soup('item')[0].next.next.next.next['url']
     return media
 
-def play(url):
+def play(url,name):
     VideoUrl = videolinks(url)
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
+    listitem = xbmcgui.ListItem(name, path=VideoUrl)
+    listitem.setInfo( type="Video", infoLabels={ "Title": name })
+    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+    # xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
 
 def addToLibrary(url):
     if mysettings.getSetting('cust_Lib_path')=='true':
@@ -118,12 +121,12 @@ def addToLibrary(url):
     if not os.path.isdir(dir):
         xbmcvfs.mkdir(dir)
         fh = xbmcvfs.File(os.path.join(dir, finalName+".strm"), 'w')
-        fh.write('plugin://'+addonID+'/?mode=3&url='+urllib.quote_plus(url))
+        fh.write('plugin://'+addonID+'/?mode=3&url='+urllib.quote_plus(url)+'&name='+urllib.quote_plus(finalName))
         fh.close()
         # xbmc.executebuiltin('UpdateLibrary(video)')
 
-def addDir(name, url, mode, iconimage,edit,inum):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)
+def addDir(name, url, mode, iconimage,edit,inum,gname):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)+"&gname="+urllib.quote_plus(gname)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
@@ -209,7 +212,7 @@ elif mode==1:
 elif mode==2:
     videolinks(url)
 elif mode==3:
-    play(url)
+    play(url,name)
 elif mode==4:
     episodes(url)
 elif mode==5:

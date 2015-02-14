@@ -123,7 +123,7 @@ def medialink(url):
         vlink = BeautifulSoup(str(vsources[len(vsources)-1]))('source')[0]['src']
     return vlink
 
-def play(url):
+def play(url,name):
     VideoUrl = medialink(url)
     print VideoUrl
     if VideoUrl.find('youtube')!=-1:
@@ -134,8 +134,10 @@ def play(url):
         VideoUrl = re.compile(idregex).findall(VideoUrl)[0]
         VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
 
-    # listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
+    listitem = xbmcgui.ListItem(name, path=VideoUrl)
+    listitem.setInfo( type="Video", infoLabels={ "Title": name })
+    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+    # xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=VideoUrl))
 
 def download(url):
     try:
@@ -177,7 +179,7 @@ def addToLibrary(url):
     if not os.path.isdir(dir):
         xbmcvfs.mkdir(dir)
         fh = xbmcvfs.File(os.path.join(dir, finalName+".strm"), 'w')
-        fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url))
+        fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url)+'&name='+urllib.quote_plus(finalName))
         fh.close()
         # xbmc.executebuiltin('UpdateLibrary(video)')
 
@@ -276,8 +278,8 @@ def addDir(name, url, mode, iconimage,edit, inum, gname):
     return ok
 
 def addLink(name,url,mode,iconimage,gname):
+    name = ''.join(["[", name, "] ", gname])
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&gname="+urllib.quote_plus(gname)
-    lu=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&gname="+urllib.quote_plus(gname)
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
@@ -356,7 +358,7 @@ elif mode==2:
 elif mode==3:
     episode(url)
 elif mode==4:
-    play(url)
+    play(url,name)
 elif mode==5:
     loadHistory(url)
 elif mode==6:
