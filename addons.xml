@@ -191,10 +191,12 @@
 
 <addon
   id="plugin.video.phimvang"
-  version="1.0.8"
+  version="1.0.9"
   name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
   provider-name="traitravinh">
   <requires>
+    <import addon="xbmc.python" version="2.1.0" optional="true"/>
+    <import addon="script.module.requests" version="2.4.3" />
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="phimvang.py">
