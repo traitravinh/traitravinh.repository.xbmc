@@ -22,7 +22,9 @@ logo = addon.getAddonInfo('icon')
 addonUserDataFolder = xbmc.translatePath("special://profile/addon_data/"+addonID).decode('utf-8')
 libraryFolder = os.path.join(addonUserDataFolder, "library")
 libraryFolderMovies = os.path.join(libraryFolder, "Movies")
+libraryFolderTV = os.path.join(libraryFolder, "TV")
 custLibFolder = mysettings.getSetting('library_path')
+custLibTvFolder = mysettings.getSetting('libraryTV_path')
 
 searchlink = 'http://m.vkool.net/search/'
 
@@ -34,6 +36,8 @@ if not os.path.isdir(libraryFolder):
     os.mkdir(libraryFolder)
 if not os.path.isdir(libraryFolderMovies):
     os.mkdir(libraryFolderMovies)
+if not os.path.isdir(libraryFolderTV):
+    os.mkdir(libraryFolderTV)
 
 def GetContent(url):
     headers = {'User-agent':'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'}
@@ -80,7 +84,6 @@ def category(url):
     except:pass
 
 def serverlist(url):
-    print gname
     link = GetContent(url)
     soup = BeautifulSoup(link)
     serverlink = BeautifulSoup(str(soup('a',{'class':'click-watch button'})))('a')[0]['href']
@@ -96,7 +99,6 @@ def serverlist(url):
 
 
 def episode(url):
-    print gname
     link = GetContent(url)
     soup = BeautifulSoup(link)
     server_item = soup('div', {'class':'server_item'})[inum]
@@ -107,11 +109,11 @@ def episode(url):
             s['class']
             sname = '1'
             slink = ssoup('a')[0]['href']
-            addLink(sname, slink, 4, iconimage,gname)
+            addLink(sname, slink, 4, iconimage,gname,inum)
         except KeyError:
             slink = ssoup('a')[0]['href']
             sname = ssoup('a')[0].contents[0]
-            addLink(sname.encode('utf-8'), slink, 4, iconimage,gname)
+            addLink(sname.encode('utf-8'), slink, 4, iconimage,gname,inum)
 
 def medialink(url):
     link = GetContent(url)
@@ -175,13 +177,98 @@ def addToLibrary(url):
     else:
         dir = os.path.join(newlibraryFolderMovies, movieFolderName)
         finalName=movieFolderName
-    print dir
+
     if not os.path.isdir(dir):
         xbmcvfs.mkdir(dir)
         fh = xbmcvfs.File(os.path.join(dir, finalName+".strm"), 'w')
         fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url)+'&name='+urllib.quote_plus(finalName))
         fh.close()
         # xbmc.executebuiltin('UpdateLibrary(video)')
+
+def addSeasonToLibrary(url):
+    if mysettings.getSetting('cust_LibTV_path')=='true':
+        newlibraryFolderMovies = custLibTvFolder
+    else:
+        newlibraryFolderMovies = libraryFolderTV
+    movieFolderName = (''.join(c for c in unicode(gname, 'utf-8') if c not in '/\\:?"*|<>')).strip(' .')
+    newMovieFolderName=''
+    finalName=''
+    keyb = xbmc.Keyboard(name, '[COLOR ffffd700]Enter Title[/COLOR]')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        newMovieFolderName=keyb.getText()
+    if newMovieFolderName !='':
+        dir = os.path.join(newlibraryFolderMovies, newMovieFolderName)
+        finalName=newMovieFolderName
+    else:
+        dir = os.path.join(newlibraryFolderMovies, movieFolderName)
+        finalName=movieFolderName
+
+    keyb = xbmc.Keyboard(name, '[COLOR ffffd700]Enter Season[/COLOR]')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        seasonnum=keyb.getText()
+
+    link = GetContent(url)
+    soup = BeautifulSoup(link)
+    server_item = soup('div', {'class':'server_item'})[inum]
+    span = BeautifulSoup(str(server_item))('span')
+
+    if not os.path.isdir(dir):
+        xbmcvfs.mkdir(dir)
+        for s in span:
+            ssoup = BeautifulSoup(str(s))
+            try:
+                s['class']
+                sname = '1'
+                if len(sname)==1:
+                    epnum = '0'+sname
+                else:
+                    epnum=etitle
+                epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
+                slink = ssoup('a')[0]['href']
+                fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
+                fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(slink)+'&name='+urllib.quote_plus(''.join(["[", sname.encode('utf-8'), "] ", gname])))
+                fh.close()
+            except KeyError:
+                slink = ssoup('a')[0]['href']
+                sname = ssoup('a')[0].contents[0]
+                if len(sname)==1:
+                    epnum = '0'+sname
+                else:
+                    epnum=sname
+                epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
+                fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
+                fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(slink)+'&name='+urllib.quote_plus(''.join(["[", sname.encode('utf-8'), "] ", gname])))
+                fh.close()
+    else:
+        dialog = xbmcgui.Dialog()
+        if dialog.yesno('TV Show Exists','Update Files?'):
+            for s in span:
+                ssoup = BeautifulSoup(str(s))
+                try:
+                    s['class']
+                    sname = '1'
+                    if len(sname)==1:
+                        epnum = '0'+sname
+                    else:
+                        epnum=etitle
+                    epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
+                    slink = ssoup('a')[0]['href']
+                    fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
+                    fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(slink)+'&name='+urllib.quote_plus(''.join(["[", sname.encode('utf-8'), "] ", gname])))
+                    fh.close()
+                except KeyError:
+                    slink = ssoup('a')[0]['href']
+                    sname = ssoup('a')[0].contents[0]
+                    if len(sname)==1:
+                        epnum = '0'+sname
+                    else:
+                        epnum=sname
+                    epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
+                    fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
+                    fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(slink)+'&name='+urllib.quote_plus(''.join(["[", sname.encode('utf-8'), "] ", gname])))
+                    fh.close()
 
 
 ######## SEARCH ###############################################################################################
@@ -277,9 +364,9 @@ def addDir(name, url, mode, iconimage,edit, inum, gname):
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
-def addLink(name,url,mode,iconimage,gname):
+def addLink(name,url,mode,iconimage,gname,inum):
     name = ''.join(["[", name, "] ", gname])
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&gname="+urllib.quote_plus(gname)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&gname="+urllib.quote_plus(gname)+"&inum="+str(inum)
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})
     liz.setProperty('mimetype', 'video/x-msvideo')
@@ -287,6 +374,7 @@ def addLink(name,url,mode,iconimage,gname):
     contextmenuitems = []
     contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=10)'%('plugin://plugin.video.vkool',urllib.quote_plus(url),urllib.quote_plus(gname))))
     contextmenuitems.append(('[COLOR ff1e90ff]Add To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=11)'%('plugin://plugin.video.vkool',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    contextmenuitems.append(('[COLOR ff1e90ff]Add Season To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&inum=%s&mode=12)'%('plugin://plugin.video.vkool',urllib.quote_plus(url),urllib.quote_plus(gname), urllib.quote_plus(str(inum)))))
     liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
@@ -373,5 +461,7 @@ elif mode==10:
     download(url)
 elif mode==11:
     addToLibrary(url)
+elif mode==12:
+    addSeasonToLibrary(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))

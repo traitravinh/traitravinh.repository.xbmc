@@ -2,10 +2,13 @@
 <addons>
 <addon
   id="plugin.video.anhtrang_org"
-  version="0.0.4"
+  version="0.0.5"
   name="[COLOR ffffff00]Anh[/COLOR][COLOR ffffa500]Trang[/COLOR][COLOR ffffffff].ORG[/COLOR]"
   provider-name="traitravinh">
   <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.urlresolver" version="2.7.0"/>
+    <import addon="script.module.simple.downloader" version="1.9.4" />
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="anhtrang.py">
@@ -95,7 +98,7 @@
 
 <addon
   id="plugin.video.moviHD"
-  version="0.0.5"
+  version="0.0.6"
   name="moviHD.net"
   provider-name="traitravinh">
   <requires>
@@ -191,7 +194,7 @@
 
 <addon
   id="plugin.video.phimvang"
-  version="1.1.0"
+  version="1.1.1"
   name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
   provider-name="traitravinh">
   <requires>
@@ -247,7 +250,7 @@
 
 <addon
   id="plugin.video.vkool"
-  version="0.0.4"
+  version="0.0.5"
   name="vkool.net"
   provider-name="traitravinh">
   <requires>

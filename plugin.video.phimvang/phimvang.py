@@ -21,7 +21,9 @@ home = mysettings.getAddonInfo('path')
 addonUserDataFolder = xbmc.translatePath("special://profile/addon_data/"+addonID).decode('utf-8')
 libraryFolder = os.path.join(addonUserDataFolder, "library")
 libraryFolderMovies = os.path.join(libraryFolder, "Movies")
+libraryFolderTV = os.path.join(libraryFolder, "TV")
 custLibFolder = mysettings.getSetting('library_path')
+custLibTvFolder = mysettings.getSetting('libraryTV_path')
 
 if not os.path.exists(os.path.join(addonUserDataFolder, "settings.xml")):
     addon.openSettings()
@@ -31,6 +33,8 @@ if not os.path.isdir(libraryFolder):
     os.mkdir(libraryFolder)
 if not os.path.isdir(libraryFolderMovies):
     os.mkdir(libraryFolderMovies)
+if not os.path.isdir(libraryFolderTV):
+    os.mkdir(libraryFolderTV)
 
 def home():
     addDir('[COLOR ffffd700]Search[/COLOR]',searchlink,5,logo,False,None,'')
@@ -164,6 +168,65 @@ def addToLibrary(url):
         fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(url)+'&name='+urllib.quote_plus(finalName))
         fh.close()
 
+def addSeasonToLibrary(url):
+    if mysettings.getSetting('cust_LibTV_path')=='true':
+        newlibraryFolderMovies = custLibTvFolder
+    else:
+        newlibraryFolderMovies = libraryFolderTV
+    movieFolderName = (''.join(c for c in unicode(gname, 'utf-8') if c not in '/\\:?"*|<>')).strip(' .')
+    newMovieFolderName=''
+    finalName=''
+    keyb = xbmc.Keyboard(name, '[COLOR ffffd700]Enter Title[/COLOR]')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        newMovieFolderName=keyb.getText()
+    if newMovieFolderName !='':
+        dir = os.path.join(newlibraryFolderMovies, newMovieFolderName)
+        finalName=newMovieFolderName
+    else:
+        dir = os.path.join(newlibraryFolderMovies, movieFolderName)
+        finalName=movieFolderName
+
+    keyb = xbmc.Keyboard(name, '[COLOR ffffd700]Enter Season[/COLOR]')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        seasonnum=keyb.getText()
+
+    link = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(link.decode('utf-8'))
+    epis = soup('p',{'class':'epi'})
+    elist = BeautifulSoup(str(epis[0]))('a')
+
+    if not os.path.isdir(dir):
+        xbmcvfs.mkdir(dir)
+        for i in range(0,len(elist)):
+            esoup = BeautifulSoup(str(elist[i]))
+            elink = root_link+esoup('a')[0]['href']
+            etitle = esoup('a')[0].contents[0]
+            if len(etitle)==1:
+                epnum = '0'+etitle
+            else:
+                epnum=etitle
+            epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
+            fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
+            fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(elink)+'&name='+urllib.quote_plus(''.join(["[", etitle.encode('utf-8'), "] ", gname])))
+            fh.close()
+    else:
+        dialog = xbmcgui.Dialog()
+        if dialog.yesno('TV Show Exists','Update Files?'):
+            for i in range(0,len(elist)):
+                esoup = BeautifulSoup(str(elist[i]))
+                elink = root_link+esoup('a')[0]['href']
+                etitle = esoup('a')[0].contents[0]
+                if len(etitle)==1:
+                    epnum = '0'+etitle
+                else:
+                    epnum=etitle
+                epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
+                fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
+                fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(elink)+'&name='+urllib.quote_plus(''.join(["[", etitle.encode('utf-8'), "] ", gname])))
+                fh.close()
+
 ############################################################################
 # SEARCH
 ############################################################################
@@ -273,7 +336,8 @@ def addLink(name,url,mode,iconimage,gname):
     liz.setProperty("IsPlayable","true")
     contextmenuitems = []
     # contextmenuitems.append(('[COLOR yellow]Download[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=10)'%('plugin://plugin.video.vkool',urllib.quote_plus(url),urllib.quote_plus(gname))))
-    contextmenuitems.append(('[COLOR ff1e90ff]Add To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=10)'%('plugin://plugin.video.phimvang',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    contextmenuitems.append(('[COLOR yellow]Add Movie To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=10)'%('plugin://plugin.video.phimvang',urllib.quote_plus(url),urllib.quote_plus(gname))))
+    contextmenuitems.append(('[COLOR yellow]Add Season To Library[/COLOR]','XBMC.Container.Update(%s?url=%s&gname=%s&mode=11)'%('plugin://plugin.video.phimvang',urllib.quote_plus(url),urllib.quote_plus(gname))))
     liz.addContextMenuItems(contextmenuitems,replaceItems=False)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
@@ -358,5 +422,7 @@ elif mode==9:
     editSearch()
 elif mode==10:
     addToLibrary(url)
+elif mode==11:
+    addSeasonToLibrary(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))
