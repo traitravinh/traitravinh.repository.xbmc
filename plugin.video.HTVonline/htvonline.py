@@ -3,89 +3,35 @@ import urllib, urllib2, re, os, sys
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 from bs4 import BeautifulSoup
-# import SimpleDownloader as downloader
 
-homelink = 'http://www.htvonline.com.vn/livetv'
-logo = 'http://static.htvonline.com.vn/layout/images/logo.png'
+rootlink = 'http://hplus.com.vn/'
+homelink = 'http://hplus.com.vn/en/categories/live-tv'
+logo = 'http://static.hplus.com.vn/themes/front/images/logoFooter.png'
 
 def home():
-    addDir('[COLOR ffff0000]Phim [/COLOR][COLOR ff32cd32]Viet [/COLOR][COLOR ff0000ff]Nam[/COLOR]','http://www.htvonline.com.vn/phim-viet-nam',3,logo)
-    addDir('[COLOR ffff0000]T[/COLOR][COLOR ff32cd32]V[/COLOR][COLOR ff0000ff] Show[/COLOR]','http://www.htvonline.com.vn/shows',3,logo)
     link = urllib2.urlopen(homelink).read()
     soup = BeautifulSoup(link.decode('utf-8'))
-    divLiveTV = soup.findAll('div',{'id':'divLiveTV'})
-    aChannels = BeautifulSoup(str(divLiveTV[0]))('a',{'class':'mh-grids5-img'})
-    for channel in aChannels:
-        channelTitle = BeautifulSoup(str(channel))('a')[0]['title'].encode('utf-8')
-        channelLink = BeautifulSoup(str(channel))('a')[0]['href'].encode('utf-8')
-        channelImage = BeautifulSoup(str(channel))('img')[0]['src']
-        addLink(channelTitle,channelLink,2,channelImage)
+    page_title = soup('div',{'class':'page-title'})
+    for p in page_title:
+        ptsoup = BeautifulSoup(str(p))
+        ptlink = ptsoup('a')[1]['href']
+        ptname = ptsoup('a')[1].contents[0].encode('utf-8')
+        addDir(ptname,ptlink,1,logo)
 
 def index(url):
     link = urllib2.urlopen(url).read()
     soup = BeautifulSoup(link.decode('utf-8'))
-    atags = soup.findAll('a',{'class':'mh-grids4-img'})
-    icount = 0
-    for a in atags:
-        aSoup = BeautifulSoup(str(a))
-        alink = aSoup('a')[0]['href'].encode('utf-8')
-        aImage = aSoup('img')[0]['data-original']
-        aTitle = soup('p',{'class':'name-en'})[icount].contents[0].encode('utf-8')
-
-        icount+=1
-        addLink(aTitle,alink,2,aImage)
-
-    paging = soup.findAll('div',{'class':'paging'})[0]
-    pagelist = BeautifulSoup(str(paging))('a')
-    for p in range(1,len(pagelist)):
-        plink = BeautifulSoup(str(pagelist[p]))('a')[0]['href']
-        ptitle = BeautifulSoup(str(pagelist[p]))('a')[0].contents[0]
-        if plink.find('javascript:void(0)')==-1:
-            addDir(ptitle,plink,1,logo)
-
-def indexdir(url):
-    link = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(link.decode('utf-8'))
-    atags = soup.findAll('a',{'class':'mh-grids4-img'})
-    icount = 0
-    for a in atags:
-        aSoup = BeautifulSoup(str(a))
-        alink = aSoup('a')[0]['href'].encode('utf-8')
-        aImage = aSoup('img')[0]['data-original']
-        aTitle = soup('p',{'class':'name-en'})[icount].contents[0].encode('utf-8')
-
-        icount+=1
-        # addLink(aTitle,alink,2,aImage)
-        addDir(aTitle,alink,4,aImage)
-
-    paging = soup.findAll('div',{'class':'paging'})[0]
-    pagelist = BeautifulSoup(str(paging))('a')
-    for p in range(1,len(pagelist)):
-        plink = BeautifulSoup(str(pagelist[p]))('a')[0]['href']
-        ptitle = BeautifulSoup(str(pagelist[p]))('a')[0].contents[0]
-        if plink.find('javascript:void(0)')==-1:
-            addDir(ptitle,plink,1,logo)
-def episodes(url):
-    link = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(link.decode('utf-8'))
-    try:
-        list_episodes = soup.findAll('div',{'class':'images_container'})
-        a_episodes = BeautifulSoup(str(list_episodes[0]))('a')
-        for a in a_episodes:
-            ahref = BeautifulSoup(str(a))('a')[0]['href']
-        #     # aTitle = BeautifulSoup(str(BeautifulSoup(str(a)).a.next.next))('i')[0].contents[0]
-            aTitle = BeautifulSoup(str(a)).a.next.next
-        #     # aTitle = itags[0].contents[0]
-        #     # print aTitle
-        #     # addLink(str(aTitle).encode('utf-8'),ahref.encode('utf-8'),2,iconimage)
-            addLink(str(aTitle).replace('<i>','').replace('</i>',''),ahref.encode('utf-8'),2,iconimage)
-    except:
-        addLink(name,url,2,iconimage)
+    divpanel = soup('div',{'class':'panel'})
+    for d in range(1,len(divpanel)):
+        dsoup = BeautifulSoup(str(divpanel[d]))
+        dlink = rootlink+dsoup('a')[1]['href']
+        dtitle = dsoup('a')[1].contents[0].encode('utf-8')
+        dimage = re.compile("background-image: url\('(.+?)'\)").findall(str(dsoup('a')[0]['style'].encode('utf-8')))[0]
+        addLink(dtitle,dlink,2,dimage)
 
 def videoLink(url):
     link = urllib2.urlopen(url).read()
-    newlink = ''.join(link.splitlines()).replace('\t','')
-    vlink = re.compile('file: "(.+?)",').findall(newlink)
+    vlink= re.compile('iosUrl = "(.+?)";').findall(link)
     return vlink[0]
 
 def play(url):
@@ -162,9 +108,5 @@ elif mode==1:
     index(url)
 elif mode==2:
     play(url)
-elif mode==3:
-    indexdir(url)
-elif mode==4:
-    episodes(url)
 
 xbmcplugin.endOfDirectory(int(sysarg))

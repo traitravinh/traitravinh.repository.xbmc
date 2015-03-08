@@ -80,10 +80,11 @@
 
 <addon
   id="plugin.video.HTVonline"
-  version="0.0.5"
+  version="0.0.6"
   name="[COLOR ffff0000]H[/COLOR][COLOR ff32cd32]T[/COLOR][COLOR ff0000ff]V[/COLOR][COLOR ffffffff]online[/COLOR]"
   provider-name="traitravinh">
   <requires>
+    <import addon="xbmc.python" version="2.1.0" optional="true"/>
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="htvonline.py">
@@ -98,7 +99,7 @@
 
 <addon
   id="plugin.video.moviHD"
-  version="0.0.6"
+  version="0.0.7"
   name="moviHD.net"
   provider-name="traitravinh">
   <requires>

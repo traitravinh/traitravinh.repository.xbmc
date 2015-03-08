@@ -168,7 +168,7 @@ def addSeasonToLibrary(url):
                 epnum=etitle
             epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
             fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
-            fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(elink)+'&name='+urllib.quote_plus(''.join(["[", etitle.encode('utf-8'), "] ", gname])))
+            fh.write('plugin://'+addonID+'/?mode=3&url='+urllib.quote_plus(elink)+'&name='+urllib.quote_plus(''.join(["[", etitle.encode('utf-8'), "] ", gname])))
             fh.close()
     else:
         dialog = xbmcgui.Dialog()
@@ -183,7 +183,7 @@ def addSeasonToLibrary(url):
                     epnum=etitle
                 epname = ''.join(["S", seasonnum, "E", epnum, ' - ', finalName])
                 fh = xbmcvfs.File(os.path.join(dir, epname+".strm"), 'w')
-                fh.write('plugin://'+addonID+'/?mode=4&url='+urllib.quote_plus(elink)+'&name='+urllib.quote_plus(''.join(["[", etitle.encode('utf-8'), "] ", gname])))
+                fh.write('plugin://'+addonID+'/?mode=3&url='+urllib.quote_plus(elink)+'&name='+urllib.quote_plus(''.join(["[", etitle.encode('utf-8'), "] ", gname])))
                 fh.close()
 
 def addDir(name, url, mode, iconimage,edit,inum,gname):
