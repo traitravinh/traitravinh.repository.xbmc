@@ -91,9 +91,11 @@ def videolinks(url):
         xml_link=url
     else:
         xml_link =homelink+'/playlist/'+re.compile('http://movihd.net/phim/(.+?)_').findall(url)[0]+'_server-2.xml'
+        print xml_link
     link = requests.get(xml_link)
-    soup = BeautifulSoup(link.text)
-    media = homelink+soup('item')[0].next.next.next.next['url']
+    # soup = BeautifulSoup(link.text)
+    # media = homelink+soup('item')[0].next.next.next.next['url']
+    media = homelink + re.compile('"url_path": "(.+?)","bitrate_label"').findall(link.text)[0]
     return media
 
 def play(url,name):

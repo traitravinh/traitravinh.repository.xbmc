@@ -22,24 +22,6 @@
 </addon>
 
 <addon
-  id="plugin.video.baobongda"
-  version="1.0.1"
-  name="BaoBongDa"
-  provider-name="traitravinh">
-  <requires>
-  </requires>
-  <extension point="xbmc.python.pluginsource"
-            library="default.py">
-        <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary>Watch Soccer highlight from baobondaplus.vn</summary>
-    <description>Watch soccer highlight (Vietnamese)Videos. Not working</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon
   id="plugin.video.bongdatructuyen"
   version="1.0.3"
   name="[COLOR FFFFFFFF]bongda[/COLOR][COLOR FF32CD32]tructuyen[/COLOR][COLOR FFFFFFFF].vn[/COLOR]"
@@ -99,7 +81,7 @@
 
 <addon
   id="plugin.video.moviHD"
-  version="0.0.7"
+  version="0.0.8"
   name="moviHD.net"
   provider-name="traitravinh">
   <requires>
@@ -176,24 +158,6 @@
 </addon>
 
 <addon
-  id="plugin.video.phimtructuyenhd"
-  version="1.0.2"
-  name="[COLOR red]Phim[/COLOR][COLOR FF0000FF]Truc[/COLOR][COLOR FF1E90FF]Tuyen[/COLOR][COLOR FFDAA520]HD[/COLOR]"
-  provider-name="traitravinh">
-  <requires>
-  </requires>
-  <extension point="xbmc.python.pluginsource"
-            library="phimtructuyenhd.py">
-        <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary>Watch Movies</summary>
-    <description>Watch (Vietnamese)Videos</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon
   id="plugin.video.phimvang"
   version="1.1.1"
   name="[COLOR white]PHIM[/COLOR][COLOR FFFFD700]VANG[/COLOR]"
@@ -232,24 +196,6 @@
 </addon>
 
 <addon
-  id="plugin.video.superphim"
-  version="1.0.3"
-  name="superphim"
-  provider-name="traitravinh">
-  <requires>
-  </requires>
-  <extension point="xbmc.python.pluginsource"
-            library="superphim.py">
-        <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary>Watch Movies</summary>
-    <description>Watch (Vietnamese)Videos on superphim.com</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon
   id="plugin.video.vkool"
   version="0.0.5"
   name="vkool.net"
@@ -267,24 +213,6 @@
   <extension point="xbmc.addon.metadata">
     <summary>Watch Movies</summary>
     <description>Watch Movies on vkool.net</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon
-  id="plugin.video.xemphimso_com"
-  version="1.0.0"
-  name="xemphimso.com"
-  provider-name="traitravinh">
-  <requires>
-  </requires>
-  <extension point="xbmc.python.pluginsource"
-            library="xemphimso_com.py">
-        <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary>Watch Movies</summary>
-    <description>Watch (Vietnamese)Videos. Not working!!!!</description>
     <platform>all</platform>
   </extension>
 </addon>
