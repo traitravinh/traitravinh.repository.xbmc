@@ -40,8 +40,6 @@ def index(url):
     try:
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
-        # soup = BeautifulSoup(link.decode('utf-8'))
-        # thumb = soup('div',{'class':'thumb'})#######
         match = re.compile('<div id="main-content">(.+?)<footer id="footer">').findall(newlink)
         thumb = BeautifulSoup(match[0].decode('utf-8'))('div',{'class':'thumb'})
         for t in thumb:
@@ -51,7 +49,6 @@ def index(url):
             addDir(ttitle,tlink,2,timage)
 
         match_pages = re.compile('<div class="loop-nav pag-nav">(.+?)<footer id="footer">').findall(newlink)
-        # wp_pagenavi = soup('div',{'class':'wp-pagenavi'})
         wp_pagenavi = BeautifulSoup(str(match_pages[0]))('div',{'class':'wp-pagenavi'})
         page_larger = BeautifulSoup(str(wp_pagenavi[0]))('a')
         for p in page_larger:
@@ -64,9 +61,6 @@ def videoLink(url):
     try:
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
-        # soup = BeautifulSoup(link.decode('utf-8'))
-        # entry_content = soup('div',{'class':'entry-content rich-content'})
-        # p_tag = BeautifulSoup(str(entry_content[0]))('p')
         match = re.compile('<div id="main-content">(.+?)<iframe src=').findall(newlink)
         p_tag = BeautifulSoup(str(match[0]))('p')
         for p in p_tag:
@@ -100,7 +94,9 @@ def retrievVideoLink(url):
             return real_link
         else:
             manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('player.json','manifest.f4m')
-            hosting_id = re.compile('http://config.playwire.com/(.+?)/videos').findall(url)[0]
+            hosting_id = re.compile('//config.playwire.com/(.+?)/videos').findall(url)[0]
+            if manifest_link.find('http:')==-1:
+                manifest_link= 'http:'+manifest_link
             link = urllib2.urlopen(manifest_link).read()
             newlink = ''.join(link.splitlines()).replace('\t','')
             base_url = re.compile('<baseURL>(.+?)</baseURL>').findall(newlink)[0]
