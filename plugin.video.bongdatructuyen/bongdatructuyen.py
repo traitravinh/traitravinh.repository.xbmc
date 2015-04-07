@@ -9,6 +9,8 @@ playwire_base_url='http://cdn.playwire.com/'
 mysettings = xbmcaddon.Addon(id='plugin.video.bongdatructuyen')
 home = mysettings.getAddonInfo('path')
 logo = 'http://www.bongdatructuyen.vn/images/logos/114x114.png'
+sopcast_logo = 'https://pbs.twimg.com/profile_images/450217704297725952/dz8tA2Nf.png'
+acestream_logo = 'http://www.droidsticks.co.uk/wp-content/uploads/2014/05/torrent_stream_logo-300x262.png'
 
 def home():
     try:
@@ -68,16 +70,15 @@ def channel_list(url):
         soup = BeautifulSoup(link.decode('utf-8'))
         list_channel = soup('div',{'id':'list-channel'})
         li = BeautifulSoup(str(list_channel[0]))('li')
+
         for i in li:
-            bitrate = BeautifulSoup(str(i))('span',{'class':'bitrate'})[0].contents[0]
             lilink = BeautifulSoup(str(i))('a')[0]['href']
-            lititle =BeautifulSoup(str(i))('a')[0].contents[0].encode('utf-8')+' ['+str(bitrate)+']'
-            liimage = str(BeautifulSoup(str(i))('img')[0]['src'])
+            lititle =BeautifulSoup(str(i))('a')[0].contents[0].encode('utf-8')
             if str(lilink).find('sopcast')!=-1:#or str(lilink).find('acestream')!=-1:
-                addLink('sopcasts - '+lititle,lilink,3,'sopcasts',liimage)
+                addLink('sopcasts - '+lititle,lilink,3,'sopcasts',sopcast_logo)
                 update_channels(lititle,lilink)
             elif str(lilink).find('acestream')!=-1:
-                addLink('acestreams - '+lititle,lilink,3,'acestreams',liimage)
+                addLink('acestreams - '+lititle,lilink,3,'acestreams',acestream_logo)
                 update_channels(lititle,lilink)
             elif str(lilink).find('sctv')!=-1:
                 addLink(lititle+ ' - sctv',homelink+str(lilink),3,'sctv',homelink+liimage)
@@ -175,11 +176,11 @@ def PlayVideo(url):
             vUrl =rtmp_link(url)
         else:
             vUrl=url
-
-        listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
-        # xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
-        listitem.setPath(vUrl)
-        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+        if mysettings.getSetting('descriptions')=='true':
+            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=vUrl))
+        else:
+            listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
+            xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(vUrl,listitem)
     except:pass
 
 def addDir(name, url, mode, iconimage):
@@ -195,7 +196,6 @@ def addLink(name,url,mode,mirror,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name})#, "overlay":6,"watched":False})
     liz.setProperty('mimetype', 'video/x-msvideo')
-    liz.setProperty("IsPlayable","true")
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz, isFolder=False)
     return ok
 

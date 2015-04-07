@@ -23,7 +23,7 @@
 
 <addon
   id="plugin.video.bongdatructuyen"
-  version="1.0.3"
+  version="1.0.4"
   name="[COLOR FFFFFFFF]bongda[/COLOR][COLOR FF32CD32]tructuyen[/COLOR][COLOR FFFFFFFF].vn[/COLOR]"
   provider-name="traitravinh">
   <requires>
