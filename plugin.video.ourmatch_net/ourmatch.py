@@ -93,7 +93,10 @@ def retrievVideoLink(url):
 
             return real_link
         else:
-            manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('player.json','manifest.f4m')
+            if url.find('player.json')!=-1:
+                manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('player.json','manifest.f4m')
+            else:
+                manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('zeus.json','manifest.f4m')
             hosting_id = re.compile('//config.playwire.com/(.+?)/videos').findall(url)[0]
             if manifest_link.find('http:')==-1:
                 manifest_link= 'http:'+manifest_link
