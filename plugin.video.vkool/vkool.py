@@ -122,7 +122,10 @@ def medialink(url):
         vlink = soup('iframe')[1]['src']
     elif link.find('<div id="player">')!=-1:
         vsources = soup('source')
-        vlink = BeautifulSoup(str(vsources[len(vsources)-1]))('source')[0]['src']
+        if mysettings.getSetting('quality')=='true':
+            vlink = BeautifulSoup(str(vsources[len(vsources)-1]))('source')[0]['src']
+        else:
+            vlink = BeautifulSoup(str(vsources[0]))('source')[0]['src']
     return vlink
 
 def play(url,name):

@@ -66,9 +66,11 @@ def videoLink(url):
         for p in p_tag:
             ptext = BeautifulSoup(str(p)).p.contents[0]
             ptext = ptext.encode('utf-8')
-            plink = BeautifulSoup(str(p)).p.next.next.next
-            pscritp =retrievVideoLink(str(plink))
-            addLink(ptext,pscritp,3,'',iconimage)
+            try:
+                plink = BeautifulSoup(str(p)).p.next.next.next
+                pscritp =retrievVideoLink(str(plink))
+                addLink(ptext,pscritp,3,'',iconimage)
+            except:pass
     except:pass
 
 def retrievVideoLink(url):
