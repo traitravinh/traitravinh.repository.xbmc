@@ -1,5 +1,5 @@
 __author__ = 'traitravinh'
-import urllib, urllib2, re, os, sys
+import urllib, urllib2, re, os, sys,json
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 from bs4 import BeautifulSoup
@@ -9,14 +9,29 @@ homelink = 'http://hplus.com.vn/en/categories/live-tv'
 logo = 'http://static.hplus.com.vn/themes/front/images/logoFooter.png'
 
 def home():
-    link = urllib2.urlopen(homelink).read()
-    soup = BeautifulSoup(link.decode('utf-8'))
-    page_title = soup('div',{'class':'page-title'})
-    for p in page_title:
-        ptsoup = BeautifulSoup(str(p))
-        ptlink = ptsoup('a')[1]['href']
-        ptname = ptsoup('a')[1].contents[0].encode('utf-8')
-        addDir(ptname,ptlink,1,logo)
+    apilink = "http://api.htvonline.com.vn/tv_channels"
+    reqdata = '{"pageCount":200,"category_id":"-1","startIndex":0}'
+    data = getContent ( apilink , reqdata)
+    print data
+    for d in data ["data"] :
+        res = d["link_play"][0]["resolution"]
+        img = d["image"]
+        title = d["name"]+' ('+res+')'
+        link = d["link_play"][0]["mp3u8_link"]
+        addLink(title.encode('utf-8'), link,2,img)
+
+def getContent(url, requestdata):
+    req = urllib2 . Request(urllib . unquote_plus(url))
+    req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+    req.add_header('Authorization', 'Basic YXBpaGF5aGF5dHY6NDUlJDY2N0Bk')
+    req.add_header('User-Agent', 'Apache-HttpClient/UNAVAILABLE (java 1.4)')
+    link = urllib . urlencode({'request': requestdata})
+    resp = urllib2 . urlopen(req, link, 120)
+    content = resp . read()
+    resp . close()
+    content = '' . join(content . splitlines())
+    data = json . loads(content)
+    return data
 
 def index(url):
     link = urllib2.urlopen(url).read()
@@ -36,7 +51,8 @@ def videoLink(url):
 
 def play(url):
     try:
-        videoId = videoLink(url)
+        # videoId = videoLink(url)
+        videoId=url
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
