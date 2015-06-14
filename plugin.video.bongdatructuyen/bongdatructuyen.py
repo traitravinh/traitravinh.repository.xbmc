@@ -1,6 +1,7 @@
 
 import urllib, urllib2, re, os, sys
 from bs4 import BeautifulSoup
+# import BeautifulSoup
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 
@@ -51,7 +52,9 @@ def getStoreChannels(url):
 def index_live(url):
     try:
         link = urllib2.urlopen(url).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        newlink = ''.join(link.splitlines()).replace('\t','')
+        match = re.compile('<div id="gamesList">(.+?)<div class="sidebar"').findall(newlink)
+        soup = BeautifulSoup(match[0].replace('\t',''))
         games = soup('ul',{'class':'games'})
         for g in games:
             li = BeautifulSoup(str(g))('li')
@@ -60,8 +63,8 @@ def index_live(url):
                 licname =BeautifulSoup(str(i))('div',{'class':'cname'})[0].contents[0]
                 licname = str(licname[0:3])
                 litime =BeautifulSoup(str(i))('div',{'class':'hour'})[0].contents[0]
-                lititle =licname+': '+BeautifulSoup(str(i))('h1')[0].contents[0].encode('utf-8') +' vs '+BeautifulSoup(str(i))('h1')[1].contents[0]+' - '+litime
-                addDir(lititle,lilink,5,logo)
+                lititle =licname+': '+BeautifulSoup(str(i))('h1')[0].contents[0] +' vs '+BeautifulSoup(str(i))('h1')[1].contents[0]+' - '+litime
+                addDir(lititle.encode('utf-8'),lilink,5,logo)
     except:pass
 
 def channel_list(url):
