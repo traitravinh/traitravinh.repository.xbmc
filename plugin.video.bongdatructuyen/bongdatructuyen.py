@@ -1,7 +1,6 @@
 
 import urllib, urllib2, re, os, sys
 from bs4 import BeautifulSoup
-# import BeautifulSoup
 import xbmc
 import xbmcaddon,xbmcplugin,xbmcgui
 
@@ -61,7 +60,7 @@ def index_live(url):
             for i in li:
                 lilink =homelink+str(BeautifulSoup(str(i))('a')[0]['href'])
                 licname =BeautifulSoup(str(i))('div',{'class':'cname'})[0].contents[0]
-                licname = str(licname[0:3])
+                # licname = str(licname[0:3])
                 litime =BeautifulSoup(str(i))('div',{'class':'hour'})[0].contents[0]
                 lititle =licname+': '+BeautifulSoup(str(i))('h1')[0].contents[0] +' vs '+BeautifulSoup(str(i))('h1')[1].contents[0]+' - '+litime
                 addDir(lititle.encode('utf-8'),lilink,5,logo)
@@ -72,19 +71,22 @@ def channel_list(url):
         link = urllib2.urlopen(url).read()
         soup = BeautifulSoup(link.decode('utf-8'))
         list_channel = soup('div',{'id':'list-channel'})
-        li = BeautifulSoup(str(list_channel[0]))('li')
-
-        for i in li:
-            lilink = BeautifulSoup(str(i))('a')[0]['href']
-            lititle =BeautifulSoup(str(i))('a')[0].contents[0].encode('utf-8')
-            if str(lilink).find('sopcast')!=-1:#or str(lilink).find('acestream')!=-1:
-                addLink('sopcasts - '+lititle,lilink,3,'sopcasts',sopcast_logo)
-                update_channels(lititle,lilink)
-            elif str(lilink).find('acestream')!=-1:
-                addLink('acestreams - '+lititle,lilink,3,'acestreams',acestream_logo)
-                update_channels(lititle,lilink)
-            elif str(lilink).find('sctv')!=-1:
-                addLink(lititle+ ' - sctv',homelink+str(lilink),3,'sctv',homelink+liimage)
+        if len(list_channel)>0:
+            li = BeautifulSoup(str(list_channel[0]))('li')
+            for i in li:
+                lilink = BeautifulSoup(str(i))('a')[0]['href']
+                lititle =BeautifulSoup(str(i))('a')[0].contents[0].encode('utf-8')
+                if str(lilink).find('sopcast')!=-1:#or str(lilink).find('acestream')!=-1:
+                    addLink('sopcasts - '+lititle,lilink,3,'sopcasts',sopcast_logo)
+                    update_channels(lititle,lilink)
+                elif str(lilink).find('acestream')!=-1:
+                    addLink('acestreams - '+lititle,lilink,3,'acestreams',acestream_logo)
+                    update_channels(lititle,lilink)
+                elif str(lilink).find('sctv')!=-1:
+                    addLink(lititle+ ' - sctv',homelink+str(lilink),3,'sctv',homelink+liimage)
+        else:
+            message = soup('div',{'class':'game-msg'})[0].contents[0]+' [COLOR FF32CD32]'+soup('div',{'class':'game-msg'})[0].next.next.next+' [/COLOR]'+soup('div',{'class':'game-msg'})[0].next.next.next.next
+            addLink(message.encode('utf-8'),'',3,'','')
 
     except:pass
 def update_channels(title,link):
