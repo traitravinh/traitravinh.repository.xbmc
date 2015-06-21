@@ -1,5 +1,5 @@
 __author__ = 'traitravinh'
-import urllib, urllib2, re, os, sys
+import urllib, urllib2, re, os, sys, requests
 from bs4 import BeautifulSoup
 import xbmcaddon,xbmcplugin,xbmcgui
 # import urlresolver
@@ -11,7 +11,7 @@ mysettings = xbmcaddon.Addon(id='plugin.video.phimxixam')
 home_path = mysettings.getAddonInfo('path')
 addonname = addon.getAddonInfo('name')
 icon = addon.getAddonInfo('icon')
-message = "Please wait! Loading.."
+message = "[COLOR ffff8c00]Loading episode: [/COLOR]"
 time=3000
 searchlink = 'http://phim.xixam.com/tim-kiem/?tk='
 homelink = 'http://phim.xixam.com'
@@ -20,6 +20,13 @@ logo ='http://phim.xixam.com/images/logo.png'
 
 while (not os.path.exists(xbmc.translatePath("special://profile/addon_data/"+addonID+"/settings.xml"))):
     addon.openSettings()
+
+
+def GetContent(url):
+    req = urllib2.Request(url)
+    req.add_unredirected_header('User-agent','Mozilla/5.0')
+    response = urllib2.urlopen(req).read()
+    return response
 
 def loadHistory(url):
     try:
@@ -109,8 +116,8 @@ def saveStoredSearch(param):
 def home():
     try:
         addDir('[COLOR ffff8c00]Search[/COLOR]',searchlink,1,logo,False,None)
-        link = urllib2.urlopen(homelink).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        link = GetContent(homelink)
+        soup = BeautifulSoup(link)
         ul_sf_menu = soup('ul',{'class':'sf-menu'})
         li = BeautifulSoup(str(ul_sf_menu[0]))('li')
         for l in li:
@@ -122,7 +129,7 @@ def home():
 
 def index(url):
     try:
-        link = urllib2.urlopen(url).read()
+        link = GetContent(url)
         soup = BeautifulSoup(link.decode('utf-8'))
         div_BlockProduct2 = soup('div',{'class':'BlockProduct2'})
         for div in div_BlockProduct2:
@@ -141,17 +148,9 @@ def index(url):
             addDir(ptitle,homelink+plink,2,logo,False,None)
     except:pass
 
-def overview(url):
-    link = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(link.decode('utf-8'))
-    div_overview = soup('div',{'class':'overview'})
-    p_style_10px = BeautifulSoup(str(div_overview[0]))('p',{'style':'padding-top:10px'})
-    return mhomelink+BeautifulSoup(str(p_style_10px[0]))('a')[0]['href']
-
 def serverlist(url):
     try:
-        link = urllib2.urlopen(overview(url)).read()
-        soup = BeautifulSoup(link.decode('utf-8'))
+        soup = BeautifulSoup(GetContent(mhomelink+BeautifulSoup(str(BeautifulSoup(GetContent(url))('p',{'style':'padding-top:10px'})))('a')[0]['href']))
         div_serverlist = soup('div',{'class':'serverlist'})
         if inum is None:
             for i in range(0,len(div_serverlist)):
@@ -168,7 +167,7 @@ def serverlist(url):
 
 def videoLink(url):
     try:
-        link = urllib2.urlopen(url).read()
+        link = GetContent(url)
         soup = BeautifulSoup(link.decode('utf-8'))
         if link.find('http://www.youtube.com/embed/')!=-1:
             video = soup('iframe')[1]['src']
@@ -179,7 +178,7 @@ def videoLink(url):
 
 def play(url):
     try:
-        xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(addonname,message, time, iconimage))
+        xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(addonname,message+name, time, iconimage))
         videoId = videoLink(url)
         if videoId.find('youtube')!=-1:
             # hostedmedia = urlresolver.HostedMediaFile('http://youtube.com/watch?v=%s'%(re.compile('http://www.youtube.com/embed/(.+?)\?').findall(videoId)[0]))
@@ -188,13 +187,10 @@ def play(url):
         listitem = xbmcgui.ListItem(name,iconImage='DefaultVideo.png',thumbnailImage=iconimage)
         listitem.setPath(videoId)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
-        # xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(videoId,listitem)
-
     except:pass
 
 def addDir(name,url,mode,iconimage,edit,inum):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&inum="+str(inum)
-    # ok=True
     liz=xbmcgui.ListItem(name, iconImage=logo, thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     contextmenuitems = []

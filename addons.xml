@@ -179,10 +179,11 @@
 
 <addon
   id="plugin.video.phimxixam"
-  version="0.0.3"
+  version="0.0.4"
   name="[COLOR ffff8c00]X[/COLOR][COLOR ffffffff]i[/COLOR][COLOR ffff8c00]X[/COLOR][COLOR ffffffff]am[/COLOR]"
   provider-name="traitravinh">
   <requires>
+  		<import addon="script.module.requests" version="2.4.3" />
   </requires>
   <extension point="xbmc.python.pluginsource"
             library="phimxixam.py">
