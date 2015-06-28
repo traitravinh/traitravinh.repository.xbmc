@@ -61,7 +61,8 @@ def videoLink(url):
     try:
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
-        match = re.compile('<div id="main-content">(.+?)<iframe src=').findall(newlink)
+        match = re.compile('<div id="main-content">(.+?)</div><!-- end #content -->').findall(newlink)
+        print match
         p_tag = BeautifulSoup(str(match[0]))('p')
         for p in p_tag:
             ptext = BeautifulSoup(str(p)).p.contents[0]
