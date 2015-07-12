@@ -52,7 +52,7 @@ def index_live(url):
     try:
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
-        match = re.compile('<div id="gamesList">(.+?)<div class="sidebar"').findall(newlink)
+        match = re.compile('<div id="gamesList">(.+?)<div id="footer"').findall(newlink)
         soup = BeautifulSoup(match[0].replace('\t',''))
         games = soup('ul',{'class':'games'})
         for g in games:
@@ -130,17 +130,10 @@ def video_url(url):
     try:
         link = urllib2.urlopen(url).read()
         soup = BeautifulSoup(link.decode('utf-8'))
-        scripts = soup('script')
-        if str(scripts[12]).find('playwire')!=-1:
-            publisherId = re.compile('publisherId=(.+?)&amp;videoId=').findall(str(scripts[12]))
-            vUrl = re.compile('config=(.+?)"}]').findall(str(scripts[12]))
-            nlink = urllib2.urlopen(vUrl[0]).read()
-            newlink =playwire_base_url + str(publisherId[0])+'/'+ str(re.compile('mp4:(.+?)"').findall(str(nlink))[0])
-            mirror='playwire'
-        elif str(scripts[12]).find('dailymotion')!=-1:
-            newlink = re.compile('http://www.dailymotion.com/swf/(.+?)"}]').findall(str(scripts[12]))[0]
-            mirror='dailymotion'
-        addLink(name,newlink,3,mirror,iconimage)
+        vurl = str(soup('iframe')[0]['src'])
+        newlink = (re.search(r'([a-zA-Z0-9-_]+|.[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+)(\?v=|/)([a-zA-Z0-9-_]+)',vurl)).group(3)
+        addLink(name,newlink,3,'youtube',iconimage)
+
     except:pass
 
 def rtmp_link(url):
@@ -266,11 +259,4 @@ elif mode==5:
     channel_list(url)
 elif mode==6:
     getStoreChannels(url)
-# elif mode==6:
-#     Search(url)
-# elif mode==7:
-#     PlayVideo(url,server)
-# elif mode==8:
-#     test(url)
-
 xbmcplugin.endOfDirectory(int(sysarg))
