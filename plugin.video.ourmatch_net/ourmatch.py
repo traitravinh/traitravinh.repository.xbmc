@@ -21,14 +21,7 @@ def home():
         link = GetContent(homelink)
         newlink = ''.join(link.splitlines()).replace('\t','')
         match = re.compile('<div class="division">(.+?)<div class="ads_mid">').findall(newlink)
-
-        # soup = BeautifulSoup(str(link.replace(' ','').replace('\t','').replace('\n','')))
-        # main_nav = soup('div',{'id':'allleagues'})
-        # li = BeautifulSoup(str(main_nav[0]))('li',{'class':'hover-tg'})
-        # li = soup('li',{'class':'hover-tg'})
-
         addDir('Latest Games',homelink,1,logo)
-
         li = BeautifulSoup(str(match[0].replace('\t','')))('li',{'class':'hover-tg'})
         for l in li:
             lilink = BeautifulSoup(str(l))('a')[0]['href']
@@ -61,14 +54,13 @@ def videoLink(url):
     try:
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
-        match = re.compile('<div id="main-content">(.+?)</div><!-- end #content -->').findall(newlink)
-        print match
-        p_tag = BeautifulSoup(str(match[0]))('p')
+        match = re.compile('<div class="video-tabs-labels">(.+?)<aside>').findall(newlink)
+        p_tag = BeautifulSoup(str(match[0]))('li')
         for p in p_tag:
-            ptext = BeautifulSoup(str(p)).p.contents[0]
+            ptext = BeautifulSoup(str(p))('a')[0].contents[0]
             ptext = ptext.encode('utf-8')
             try:
-                plink = BeautifulSoup(str(p)).p.next.next.next
+                plink = BeautifulSoup(str(p))('li')[0]['data-script-content']
                 pscritp =retrievVideoLink(str(plink))
                 addLink(ptext,pscritp,3,'',iconimage)
             except:pass
