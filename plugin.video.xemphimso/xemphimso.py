@@ -82,6 +82,13 @@ def episode(url):
 
 def play(url,name):
     VideoUrl = videolinks(url)
+    if VideoUrl.find('youtube')!=-1:
+        match = re.compile('&.+').findall(VideoUrl)
+        if len(match)>0:
+            VideoUrl= VideoUrl.replace(match[0],'')
+        idregex = r'https?://www.youtube.com/(?:embed/|watch\?v=)'+r'(.+?(?=\?)|.+)'
+        VideoUrl = re.compile(idregex).findall(VideoUrl)[0]
+        VideoUrl = "plugin://plugin.video.youtube?path=/root/video&action=play_video&videoid="+urllib.quote_plus(VideoUrl).replace('?','')
     listitem = xbmcgui.ListItem(name, path=VideoUrl)
     listitem.setInfo( type="Video", infoLabels={ "Title": name })
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
@@ -89,6 +96,7 @@ def play(url,name):
 def videolinks(url):
     link = GetContent(url)
     vlinks = re.compile('urlplayer = "(.+?)&pre').findall(link)[0]
+    print vlinks
     subvlinks = GetContent(vlinks)
     filelink = re.compile('"file":"(.+?),"label"').findall(subvlinks)
     if len(filelink)==0:
