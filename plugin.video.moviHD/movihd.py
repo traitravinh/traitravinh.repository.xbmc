@@ -1,6 +1,6 @@
 # __author__ = 'traitravinh'
 import urllib, urllib2, re, os, sys
-import xbmcaddon,xbmcplugin,xbmcgui,requests
+import xbmcaddon,xbmcplugin,xbmcgui,requests,string
 from bs4 import BeautifulSoup
 import SimpleDownloader as downloader
 import xbmcvfs
@@ -8,7 +8,7 @@ import xbmcvfs
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
 addonname = addon.getAddonInfo('name')
-mysettings = xbmcaddon.Addon(id='plugin.video.movihd')
+mysettings = xbmcaddon.Addon(id='plugin.video.moviHD')
 homelink = 'http://movihd.net'
 logo = 'http://movihd.net/img/logo.png'
 downloader = downloader.SimpleDownloader()
@@ -83,18 +83,17 @@ def episodes(url):
     for e in episodes:
         esoup = BeautifulSoup(str(e))
         elink =homelink+'/playlist/'+re.compile("javascript:PlayFilm\('(.+?)'\)").findall(esoup('a')[0]['href'])[0]+'_server-2.xml'
+        # elink = homelink+'/playlist/'+re.compile('javascript:PlayFilm\(\'(.+?)\'\)"><img src').findall(link)[0]+'.xml'
         etitle = str(esoup('a')[0].contents[0].encode('utf-8'))
         addLink(etitle,elink,3,iconimage,gname)
 
 def videolinks(url):
+    nlink = requests.get(url).text
     if url.find('xml')!=-1:
         xml_link=url
     else:
-        xml_link =homelink+'/playlist/'+re.compile('http://movihd.net/phim/(.+?)_').findall(url)[0]+'_server-2.xml'
+        xml_link =homelink+'/playlist/'+re.compile('javascript:PlayFilm\(\'(.+?)\'\)"><img src').findall(nlink)[0]+'.xml'
     link = requests.get(xml_link)
-    # soup = BeautifulSoup(link.text)
-    # media = homelink+soup('item')[0].next.next.next.next['url']
-    # media = homelink + re.compile('"url_path": "(.+?)","bitrate_label"').findall(link.text)[0]
     media = re.compile('"url_path": "(.+?)","bitrate_label"').findall(link.text)[0]
     return media
 
