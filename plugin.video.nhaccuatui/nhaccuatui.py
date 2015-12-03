@@ -114,25 +114,20 @@ def GetContent(url):
 
 def index_search(url):
     try:
-        print url
         link = GetContent(url)
         newlink = ''.join(link.splitlines()).replace('\t','')
-        #Because of bugs in Beautifulsoup(can't parse whole newlink) so needs to use regex to get part of document first to use beautifulsoup
         match = re.compile('<ul class="search_control_select">(.+?)<a href="javascript:').findall(newlink)
         soup = BeautifulSoup(match[0].replace('\t',''))
-        # search_control_select = soup('ul',{'class':'search_control_select'})
-        # li_soup = BeautifulSoup(str(search_control_select[0]))('a')
         li_soup = BeautifulSoup(str(match[0].replace('\t','')))('a')
 
         for i in range(1,4):
             a_soup = BeautifulSoup(str(li_soup[i]))
             alink = a_soup('a')[0]['href']
             atitle = a_soup('a')[0]['title'].encode('utf-8')
-            acount=a_soup('span')[0].contents[0]
-            title = atitle + str(acount)
-            print alink
-            print title +'\n'
-            addDir(title,alink,4,logo,atitle,False,None)
+            # acount=a_soup('span')[0].contents[0]
+            # title = atitle + str(acount)
+
+            addDir(atitle,alink,4,logo,atitle,False,None)
     except:pass
 
 def search_return(url,cname):
@@ -146,7 +141,6 @@ def search_return(url,cname):
         if cname.find('B')!=-1:
             key='list_song'
             subkey = 'name_song'
-            #Because of BSoup bug, we have to have this extra line
             match = re.compile('<ul class="search_returns_list">(.+?)<div class="box_pageview">').findall(newlink)
         elif cname.find('P')!=-1:
             key = 'list_album'
@@ -168,8 +162,6 @@ def search_return(url,cname):
             except:pass
             atitle = asoup('a',{'class':subkey})[0]['title'].encode('utf-8')
             addDir(atitle,alink,5,image,cname,False,None)
-
-        # box_pageview = soup('div',{'class':'box_pageview'})#BSoup not work, switch to regex
         match_page = re.compile('<div class="box_pageview">(.+?)</div>').findall(newlink)
 
         pages = BeautifulSoup(str(match_page[0].replace('\t',''))).findAll('a')
