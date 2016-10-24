@@ -220,7 +220,7 @@
 
 <addon
   id="plugin.video.xemphimso"
-  version="0.0.3"
+  version="0.0.5"
   name="[COLOR FF32CD32]XemPhimSo[/COLOR]"
   provider-name="traitravinh">
   <requires>

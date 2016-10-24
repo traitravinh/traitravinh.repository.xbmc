@@ -95,7 +95,7 @@ def play(url,name):
 
 def videolinks(url):
     link = GetContent(url)
-    vlinks = re.compile('urlplayer = "(.+?)&pre').findall(link)[0]
+    vlinks = re.compile('}</script><script type="text/javascript" src="(.+?)"></script></div>').findall(link)[0]
     print vlinks
     subvlinks = GetContent(vlinks)
     filelink = re.compile('"file":"(.+?),"label"').findall(subvlinks)
