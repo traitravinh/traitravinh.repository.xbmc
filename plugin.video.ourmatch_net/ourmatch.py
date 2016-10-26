@@ -54,57 +54,28 @@ def videoLink(url):
     try:
         link = urllib2.urlopen(url).read()
         newlink = ''.join(link.splitlines()).replace('\t','')
-        match = re.compile('<div class="video-tabs-labels">(.+?)<aside>').findall(newlink)
-        p_tag = BeautifulSoup(str(match[0]))('li')
-        for p in p_tag:
-            ptext = BeautifulSoup(str(p))('a')[0].contents[0]
-            ptext = ptext.encode('utf-8')
-            try:
-                plink = BeautifulSoup(str(p))('li')[0]['data-script-content']
-                pscritp =retrievVideoLink(str(plink))
-                addLink(ptext,pscritp,3,'',iconimage)
-            except:pass
+        match = re.compile('embed:\'<iframe src="(.+?)&loop=1').findall(newlink)
+        vlink=''
+        try:
+            rematch = match[0]
+            vlink = retrievVideoLink(rematch)
+        except:pass
+        if vlink is None:
+            rematch = re.compile('https://(.+?)&amp').findall(match[0])
+            rematch= 'https://'+rematch[0]
+            vlink = retrievVideoLink(rematch)
+        addLink('Highlights',vlink,3,'',iconimage)
+
     except:pass
 
 def retrievVideoLink(url):
     try:
-        if str(url).find('data-publisher-id')!=-1:
-            publisherId = re.compile('data-publisher-id="(.+?)" data-video-id').findall(url)
-            videoId = re.compile('data-video-id="(.+?)"').findall(url)
-
-            f4m_link = playwire_base_url+'v2/' + str(publisherId[0])+'/config/'+str(videoId[0])+'.json'
-            link = urllib2.urlopen(f4m_link).read()
-            f4m_src = re.compile('"src":"(.+?)"|\'').findall(str(link))
-            if str(f4m_src[0]).find('.f4m')!=-1:
-                nlink = urllib2.urlopen(f4m_src[0]).read()
-                vCode = re.compile('mp4:(.+?)" ').findall(str(nlink))
-                if len(vCode)>1:
-                    sCode = vCode[1]
-                else:
-                    sCode=vCode[0]
-                real_link = playwire_base_url+publisherId[0]+'/'+str(sCode)
-            elif str(f4m_src[0]).find('rtmp://streaming')!=-1:
-                real_link = str(f4m_src[0]).replace('rtmp://streaming','http://cdn').replace('mp4:','')
-
-            return real_link
-        else:
-            if url.find('player.json')!=-1:
-                manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('player.json','manifest.f4m')
-            else:
-                manifest_link = re.compile('data-config="(.+?)"').findall(url)[0].replace('zeus.json','manifest.f4m')
-            hosting_id = re.compile('//config.playwire.com/(.+?)/videos').findall(url)[0]
-            if manifest_link.find('http:')==-1:
-                manifest_link= 'http:'+manifest_link
-            link = urllib2.urlopen(manifest_link).read()
-            newlink = ''.join(link.splitlines()).replace('\t','')
-            base_url = re.compile('<baseURL>(.+?)</baseURL>').findall(newlink)[0]
-            if newlink.find('video-hd.mp4?hosting_id=')!=-1:
-                media_id = '/video-hd.mp4?hosting_id='+hosting_id
-            else:
-                media_id='/video-sd.mp4?hosting_id='+hosting_id
-            real_link = base_url+media_id
-            return real_link
-
+        link = urllib2.urlopen(url).read()
+        soup = BeautifulSoup(link)
+        match = soup('video',{'id':'embed_video_player'})
+        sources = BeautifulSoup(str(match[0]))('source')
+        finallink = BeautifulSoup(str(sources[len(sources)-1]))('source')[0]['src']
+        return finallink
     except:pass
 
 def PlayVideo(url):
